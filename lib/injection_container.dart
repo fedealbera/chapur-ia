@@ -1,0 +1,123 @@
+import 'package:get_it/get_it.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:chapur_ia/core/constants/constants.dart';
+
+// Auth
+import 'package:chapur_ia/data/datasources/remote/auth_remote_data_source.dart';
+import 'package:chapur_ia/data/repositories/auth_repository_impl.dart';
+import 'package:chapur_ia/domain/repositories/i_auth_repository.dart';
+import 'package:chapur_ia/domain/usecases/auth/login_use_case.dart';
+import 'package:chapur_ia/presentation/blocs/auth/auth_bloc.dart';
+
+// Products
+import 'package:chapur_ia/data/datasources/remote/product_remote_data_source.dart';
+import 'package:chapur_ia/data/repositories/product_repository_impl.dart';
+import 'package:chapur_ia/domain/repositories/i_product_repository.dart';
+import 'package:chapur_ia/domain/usecases/products/get_products_use_case.dart';
+import 'package:chapur_ia/presentation/blocs/product/product_bloc.dart';
+
+// Customers
+import 'package:chapur_ia/data/datasources/remote/customer_remote_data_source.dart';
+import 'package:chapur_ia/data/repositories/customer_repository_impl.dart';
+import 'package:chapur_ia/domain/repositories/i_customer_repository.dart';
+import 'package:chapur_ia/domain/usecases/customers/customer_use_cases.dart';
+import 'package:chapur_ia/presentation/blocs/customer/customer_bloc.dart';
+
+// Orders
+import 'package:chapur_ia/data/datasources/remote/order_remote_data_source.dart';
+import 'package:chapur_ia/data/repositories/order_repository_impl.dart';
+import 'package:chapur_ia/domain/repositories/i_order_repository.dart';
+import 'package:chapur_ia/domain/usecases/orders/order_use_cases.dart';
+import 'package:chapur_ia/presentation/blocs/order/order_bloc.dart';
+
+// Account
+import 'package:chapur_ia/data/datasources/remote/account_remote_data_source.dart';
+import 'package:chapur_ia/data/repositories/account_repository_impl.dart';
+import 'package:chapur_ia/domain/repositories/i_account_repository.dart';
+import 'package:chapur_ia/domain/usecases/account/account_use_cases.dart';
+import 'package:chapur_ia/presentation/blocs/account/account_bloc.dart';
+
+final sl = GetIt.instance;
+
+Future<void> init() async {
+  //! Features - Auth
+  sl.registerFactory(() => AuthBloc(
+        loginUseCase: sl(),
+        authRepository: sl(),
+      ));
+  sl.registerLazySingleton(() => LoginUseCase(sl()));
+  sl.registerLazySingleton<IAuthRepository>(() => AuthRepositoryImpl(
+        remoteDataSource: sl(),
+        secureStorage: sl(),
+      ));
+  sl.registerLazySingleton<IAuthRemoteDataSource>(
+      () => AuthRemoteDataSourceImpl(dio: sl()));
+
+  //! Features - Products
+  sl.registerFactory(() => ProductBloc(
+        getProductsUseCase: sl(),
+        getProductDetailUseCase: sl(),
+      ));
+  sl.registerLazySingleton(() => GetProductsUseCase(sl()));
+  sl.registerLazySingleton(() => GetProductDetailUseCase(sl()));
+  sl.registerLazySingleton<IProductRepository>(
+      () => ProductRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<IProductRemoteDataSource>(
+      () => ProductRemoteDataSourceImpl(dio: sl()));
+
+  //! Features - Customers
+  sl.registerFactory(() => CustomerBloc(
+        searchCustomersUseCase: sl(),
+        getCustomerDetailUseCase: sl(),
+      ));
+  sl.registerLazySingleton(() => SearchCustomersUseCase(sl()));
+  sl.registerLazySingleton(() => GetCustomerDetailUseCase(sl()));
+  sl.registerLazySingleton<ICustomerRepository>(
+      () => CustomerRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<ICustomerRemoteDataSource>(
+      () => CustomerRemoteDataSourceImpl(dio: sl()));
+
+  //! Features - Orders
+  sl.registerFactory(() => OrderBloc(
+        getOrdersUseCase: sl(),
+        getOrderDetailUseCase: sl(),
+        createOrderUseCase: sl(),
+      ));
+  sl.registerLazySingleton(() => GetOrdersUseCase(sl()));
+  sl.registerLazySingleton(() => GetOrderDetailUseCase(sl()));
+  sl.registerLazySingleton(() => CreateOrderUseCase(sl()));
+  sl.registerLazySingleton<IOrderRepository>(
+      () => OrderRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<IOrderRemoteDataSource>(
+      () => OrderRemoteDataSourceImpl(dio: sl()));
+
+  //! Features - Account (Cta Cte)
+  sl.registerFactory(() => AccountBloc(
+        getAccountSummaryUseCase: sl(),
+        getDocumentDetailUseCase: sl(),
+      ));
+  sl.registerLazySingleton(() => GetAccountSummaryUseCase(sl()));
+  sl.registerLazySingleton(() => GetDocumentDetailUseCase(sl()));
+  sl.registerLazySingleton<IAccountRepository>(
+      () => AccountRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<IAccountRemoteDataSource>(
+      () => AccountRemoteDataSourceImpl(dio: sl()));
+
+  //! Core
+  // sl.registerLazySingleton(() => NetworkInfo(sl()));
+
+  //! External
+  sl.registerLazySingleton(() => Dio(BaseOptions(
+        baseUrl: AppConstants.baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept-Language': 'en-US',
+        },
+      )));
+      
+  const storage = FlutterSecureStorage();
+  sl.registerLazySingleton(() => storage);
+}
