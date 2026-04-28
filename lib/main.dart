@@ -50,7 +50,7 @@ class ChapurApp extends StatelessWidget {
           builder: (context, state) {
             if (state is Authenticated) {
               return const DashboardPage();
-            } else if (state is AuthInitial || state is AuthLoading) {
+            } else if (state is AuthInitial) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
               );
