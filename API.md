@@ -2,7 +2,7 @@
 
 API REST del portal B2B de Chapur S.A. Autenticación mediante **JWT Bearer Token**.
 
-- **Base URL (dev):** `http://localhost:5175`
+- **Base URL (dev):** `https://web.tmc.com.ar`
 - **Swagger UI:** `/swagger`
 - **Content-Type:** `application/json`
 - **Cultura:** `en-US` (punto decimal)
@@ -569,23 +569,23 @@ Detalle de un comprobante (Factura A o Recibo) con datos para imprimir el PDF fi
 ### Login y uso del token
 ```bash
 # 1. Obtener token
-TOKEN=$(curl -s -X POST http://localhost:5175/api/auth/login \
+TOKEN=$(curl -s -X POST https://web.tmc.com.ar/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"cliente@chapur.com.ar","password":"Pass123!"}' \
   | jq -r .token)
 
 # 2. Listar productos
-curl -s http://localhost:5175/api/products?page=1&pageSize=10 \
+curl -s https://web.tmc.com.ar/api/products?page=1&pageSize=10 \
   -H "Authorization: Bearer $TOKEN"
 
 # 3. Agregar al carrito
-curl -s -X POST http://localhost:5175/api/cart/items \
+curl -s -X POST https://web.tmc.com.ar/api/cart/items \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"articleCode":"02-01-0064","quantity":2}'
 
 # 4. Crear pedido
-curl -s -X POST http://localhost:5175/api/orders \
+curl -s -X POST https://web.tmc.com.ar/api/orders \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

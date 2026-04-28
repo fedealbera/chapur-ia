@@ -24,59 +24,29 @@ class AccountRemoteDataSourceImpl implements IAccountRemoteDataSource {
     required DateTime fechaHasta,
     int soloPendientes = 0,
   }) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return AccountSummaryModel.fromJson({
-      'accountNumber': accountNumber,
-      'customerName': 'Cliente de Prueba 1',
-      'fechaDesde': fechaDesde.toIso8601String(),
-      'fechaHasta': fechaHasta.toIso8601String(),
-      'totalDebe': 150000.0,
-      'totalHaber': 50000.0,
-      'saldoFinal': 100000.0,
-      'items': [
-        {
-          'fecha': DateTime.now().toIso8601String(),
-          'documentCode': 'FC',
-          'documentNumber': 1001,
-          'puntoVenta': '0001',
-          'descripcion': 'Factura A',
-          'debe': 10000.0,
-          'haber': 0.0,
-          'saldo': 100000.0,
-          'estado': 'Pendiente',
+    try {
+      final response = await dio.get(
+        '/cuenta-corriente/resumen',
+        queryParameters: {
+          'accountNumber': accountNumber,
+          'fechaDesde': fechaDesde.toIso8601String(),
+          'fechaHasta': fechaHasta.toIso8601String(),
+          'soloPendientes': soloPendientes,
         },
-        {
-          'fecha': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
-          'documentCode': 'RC',
-          'documentNumber': 5001,
-          'puntoVenta': '0001',
-          'descripcion': 'Recibo',
-          'debe': 0.0,
-          'haber': 5000.0,
-          'saldo': 90000.0,
-          'estado': 'Aplicado',
-        }
-      ]
-    });
+      );
+      return AccountSummaryModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
   Future<Map<String, dynamic>> getDocumentDetail(String documentCode, int documentNumber) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return {
-      'documentCode': documentCode,
-      'documentNumber': documentNumber,
-      'fecha': DateTime.now().toIso8601String(),
-      'puntoVenta': '0001',
-      'total': 10000.0,
-      'items': [
-        {
-          'description': 'Laptop Dell Latitude',
-          'quantity': 1,
-          'unitPrice': 10000.0,
-          'subtotal': 10000.0,
-        }
-      ],
-    };
+    try {
+      final response = await dio.get('/cuenta-corriente/comprobante/$documentCode/$documentNumber');
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      rethrow;
+    }
   }
 }

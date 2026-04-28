@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chapur_ia/core/constants/constants.dart';
 
 // Auth
+import 'package:chapur_ia/core/network/dio_interceptor.dart';
 import 'package:chapur_ia/data/datasources/remote/auth_remote_data_source.dart';
 import 'package:chapur_ia/data/repositories/auth_repository_impl.dart';
 import 'package:chapur_ia/domain/repositories/i_auth_repository.dart';
@@ -37,6 +38,12 @@ import 'package:chapur_ia/data/repositories/account_repository_impl.dart';
 import 'package:chapur_ia/domain/repositories/i_account_repository.dart';
 import 'package:chapur_ia/domain/usecases/account/account_use_cases.dart';
 import 'package:chapur_ia/presentation/blocs/account/account_bloc.dart';
+
+// Cart
+import 'package:chapur_ia/data/datasources/remote/cart_remote_data_source.dart';
+import 'package:chapur_ia/data/repositories/cart_repository_impl.dart';
+import 'package:chapur_ia/domain/repositories/i_cart_repository.dart';
+import 'package:chapur_ia/domain/usecases/cart/cart_use_cases.dart';
 
 final sl = GetIt.instance;
 
@@ -104,20 +111,36 @@ Future<void> init() async {
   sl.registerLazySingleton<IAccountRemoteDataSource>(
       () => AccountRemoteDataSourceImpl(dio: sl()));
 
+  //! Features - Cart
+  sl.registerLazySingleton(() => GetCartUseCase(sl()));
+  sl.registerLazySingleton(() => AddToCartUseCase(sl()));
+  sl.registerLazySingleton(() => RemoveFromCartUseCase(sl()));
+  sl.registerLazySingleton(() => ClearCartUseCase(sl()));
+  sl.registerLazySingleton<ICartRepository>(
+      () => CartRepositoryImpl(remoteDataSource: sl()));
+  sl.registerLazySingleton<ICartRemoteDataSource>(
+      () => CartRemoteDataSourceImpl(dio: sl()));
+
   //! Core
   // sl.registerLazySingleton(() => NetworkInfo(sl()));
 
   //! External
-  sl.registerLazySingleton(() => Dio(BaseOptions(
-        baseUrl: AppConstants.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept-Language': 'en-US',
-        },
-      )));
-      
   const storage = FlutterSecureStorage();
   sl.registerLazySingleton(() => storage);
+
+  sl.registerLazySingleton(() {
+    final dio = Dio(BaseOptions(
+      baseUrl: AppConstants.baseUrl,
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en-US',
+      },
+    ));
+    
+    dio.interceptors.add(AuthInterceptor(secureStorage: sl()));
+    
+    return dio;
+  });
 }

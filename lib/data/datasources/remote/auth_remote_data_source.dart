@@ -11,32 +11,17 @@ class AuthRemoteDataSourceImpl implements IAuthRemoteDataSource {
 
   @override
   Future<Map<String, dynamic>> login(String email, String password) async {
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // MOCK DATA
-    if (email == 'error@test.com') {
-      throw DioException(
-        requestOptions: RequestOptions(path: '/auth/login'),
-        type: DioExceptionType.badResponse,
-        response: Response(
-          requestOptions: RequestOptions(path: '/auth/login'),
-          statusCode: 401,
-          statusMessage: 'Credenciales inválidas',
-        )
+    try {
+      final response = await dio.post(
+        '/auth/login',
+        data: {
+          'email': email,
+          'password': password,
+        },
       );
+      return response.data as Map<String, dynamic>;
+    } catch (e) {
+      rethrow;
     }
-
-    return {
-      'token': 'mock_token_12345',
-      'user': {
-        'id': '1',
-        'email': email,
-        'name': 'Usuario de Prueba',
-        'role': 'Salesperson',
-        'customerAccountNumber': 'CU001',
-        'customerName': 'Cliente de Prueba 1',
-        'priceListCode': '1',
-      }
-    };
   }
 }
