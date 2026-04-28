@@ -14,6 +14,15 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   final _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Carga inicial de todos los clientes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CustomerBloc>().add(const SearchCustomersRequested(term: '', reset: true));
+    });
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -35,7 +44,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
               fillColor: Colors.grey.shade50,
             ),
             onChanged: (value) {
-              if (value.length >= 2) {
+              if (value.isEmpty || value.length >= 2) {
                 context.read<CustomerBloc>().add(SearchCustomersRequested(term: value, reset: true));
               }
             },

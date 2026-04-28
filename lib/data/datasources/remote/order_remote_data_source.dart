@@ -20,38 +20,55 @@ class OrderRemoteDataSourceImpl implements IOrderRemoteDataSource {
 
   @override
   Future<List<OrderModel>> getOrders({String? accountNumber}) async {
-    final Map<String, dynamic> queryParams = {};
-    if (accountNumber != null) {
-      queryParams['accountNumber'] = accountNumber;
-    }
-
-    final response = await dio.get('/orders', queryParameters: queryParams);
-
-    if (response.statusCode == 200) {
-      final List<dynamic> ordersList = response.data;
-      return ordersList.map((json) => OrderModel.fromJson(json)).toList();
-    } else {
-      throw DioException(
-        requestOptions: response.requestOptions,
-        response: response,
-        type: DioExceptionType.badResponse,
-      );
-    }
+    await Future.delayed(const Duration(seconds: 1));
+    return [
+      OrderModel.fromJson({
+        'id': '1',
+        'orderNumber': 'ORD-001',
+        'legacyOrderId': 'LEG-001',
+        'customerAccountNumber': accountNumber ?? 'CU001',
+        'customerName': 'Cliente de Prueba 1',
+        'date': DateTime.now().toIso8601String(),
+        'status': 'Pendiente',
+        'total': 1500.00,
+        'items': []
+      }),
+      OrderModel.fromJson({
+        'id': '2',
+        'orderNumber': 'ORD-002',
+        'legacyOrderId': 'LEG-002',
+        'customerAccountNumber': accountNumber ?? 'CU001',
+        'customerName': 'Cliente de Prueba 1',
+        'date': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+        'status': 'Entregado',
+        'total': 3200.50,
+        'items': []
+      }),
+    ];
   }
 
   @override
   Future<OrderModel> getOrderDetail(String id) async {
-    final response = await dio.get('/orders/$id');
-
-    if (response.statusCode == 200) {
-      return OrderModel.fromJson(response.data);
-    } else {
-      throw DioException(
-        requestOptions: response.requestOptions,
-        response: response,
-        type: DioExceptionType.badResponse,
-      );
-    }
+    await Future.delayed(const Duration(seconds: 1));
+    return OrderModel.fromJson({
+      'id': id,
+      'orderNumber': 'ORD-00$id',
+      'legacyOrderId': 'LEG-00$id',
+      'customerAccountNumber': 'CU001',
+      'customerName': 'Cliente de Prueba 1',
+      'date': DateTime.now().toIso8601String(),
+      'status': 'Pendiente',
+      'total': 1000.00,
+      'items': [
+        {
+          'articleCode': 'PROD-1',
+          'description': 'Producto A',
+          'quantity': 2,
+          'unitPrice': 500.00,
+          'subtotal': 1000.00
+        }
+      ]
+    });
   }
 
   @override
@@ -62,25 +79,7 @@ class OrderRemoteDataSourceImpl implements IOrderRemoteDataSource {
     String? notes,
     String? estimatedDeliveryDate,
   }) async {
-    final response = await dio.post(
-      '/orders',
-      data: {
-        'deliveryAddress': deliveryAddress,
-        'deliveryContact': deliveryContact,
-        'deliveryPhone': deliveryPhone,
-        'notes': notes,
-        'estimatedDeliveryDate': estimatedDeliveryDate,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      return response.data['orderId'];
-    } else {
-      throw DioException(
-        requestOptions: response.requestOptions,
-        response: response,
-        type: DioExceptionType.badResponse,
-      );
-    }
+    await Future.delayed(const Duration(seconds: 1));
+    return 'ORD-${DateTime.now().millisecondsSinceEpoch}';
   }
 }

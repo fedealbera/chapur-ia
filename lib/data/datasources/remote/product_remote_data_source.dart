@@ -26,40 +26,68 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
     List<String>? productTypes,
     List<int>? brandCodes,
   }) async {
-    final Map<String, dynamic> queryParams = {
+    await Future.delayed(const Duration(seconds: 1));
+    
+    final allItems = [
+      {
+        'productType': '1',
+        'articleCode': 'ART_01',
+        'name': 'Laptop Dell Latitude',
+        'description': 'Laptop para trabajo corporativo',
+        'brandCode': 1,
+        'brandName': 'Dell',
+        'unitPrice': 1200000.0,
+        'priceListCode': '1',
+        'imageUrl': '',
+        'stockStatus': 'DISPONIBLE',
+        'stockQuantity': 50,
+      },
+      {
+        'productType': '1',
+        'articleCode': 'ART_02',
+        'name': 'Monitor Samsung 24"',
+        'description': 'Monitor LED Full HD',
+        'brandCode': 2,
+        'brandName': 'Samsung',
+        'unitPrice': 300000.0,
+        'priceListCode': '1',
+        'imageUrl': '',
+        'stockStatus': 'DISPONIBLE',
+        'stockQuantity': 20,
+      }
+    ];
+
+    List<dynamic> filteredItems = allItems;
+    if (search != null && search.isNotEmpty) {
+      filteredItems = allItems.where((item) => 
+        item['name'].toString().toLowerCase().contains(search.toLowerCase()) || 
+        item['articleCode'].toString().toLowerCase().contains(search.toLowerCase())
+      ).toList();
+    }
+
+    return {
+      'items': filteredItems,
+      'total': filteredItems.length,
       'page': page,
       'pageSize': pageSize,
     };
-
-    if (search != null) queryParams['search'] = search;
-    if (productTypes != null) queryParams['productType'] = productTypes;
-    if (brandCodes != null) queryParams['brandCode'] = brandCodes.map((e) => e.toString()).toList();
-
-    final response = await dio.get('/products', queryParameters: queryParams);
-
-    if (response.statusCode == 200) {
-      return response.data;
-    } else {
-      throw DioException(
-        requestOptions: response.requestOptions,
-        response: response,
-        type: DioExceptionType.badResponse,
-      );
-    }
   }
 
   @override
   Future<ProductModel> getProductDetail(String productType, String articleCode) async {
-    final response = await dio.get('/products/$productType/$articleCode');
-
-    if (response.statusCode == 200) {
-      return ProductModel.fromJson(response.data);
-    } else {
-      throw DioException(
-        requestOptions: response.requestOptions,
-        response: response,
-        type: DioExceptionType.badResponse,
-      );
-    }
+    await Future.delayed(const Duration(seconds: 1));
+    return ProductModel.fromJson({
+      'productType': productType,
+      'articleCode': articleCode,
+      'name': 'Producto Demo $articleCode',
+      'description': 'Descripción extendida del producto',
+      'brandCode': 1,
+      'brandName': 'Marca Demo',
+      'unitPrice': 150000.0,
+      'priceListCode': '1',
+      'imageUrl': '',
+      'stockStatus': 'DISPONIBLE',
+      'stockQuantity': 100,
+    });
   }
 }
