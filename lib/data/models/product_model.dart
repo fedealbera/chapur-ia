@@ -23,7 +23,7 @@ class ProductModel extends Product {
       description: json['description']?.toString() ?? '',
       brandCode: (json['brandCode'] as num?)?.toInt() ?? 0,
       brandName: json['brandName']?.toString() ?? '',
-      unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0.0,
+      unitPrice: (json['price'] as num? ?? json['unitPrice'] as num? ?? 0.0).toDouble(),
       priceListCode: json['priceListCode']?.toString() ?? '',
       imageUrl: json['imageUrl']?.toString() ?? '',
       stockStatus: json['stockStatus']?.toString() ?? '',

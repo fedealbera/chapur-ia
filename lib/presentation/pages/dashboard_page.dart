@@ -26,15 +26,21 @@ class _DashboardPageState extends State<DashboardPage> {
     final bool canSearchCustomers = user.isAdmin || user.isSalesperson;
 
     final List<Widget> pages = [
-      if (canSearchCustomers) const CustomerSearchPage() else const ProductCatalogPage(),
+      if (canSearchCustomers) const CustomerSearchPage(),
+      const ProductCatalogPage(),
       const OrderHistoryPage(),
       const AccountSummaryPage(),
     ];
 
     final List<BottomNavigationBarItem> navItems = [
-      BottomNavigationBarItem(
-        icon: Icon(canSearchCustomers ? Icons.people_outline : Icons.shopping_bag_outlined),
-        label: canSearchCustomers ? 'Clientes' : 'Catálogo',
+      if (canSearchCustomers)
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.people_outline),
+          label: 'Clientes',
+        ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.shopping_bag_outlined),
+        label: 'Catálogos',
       ),
       const BottomNavigationBarItem(
         icon: Icon(Icons.history_outlined),
@@ -49,9 +55,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _selectedIndex == 0
-              ? (canSearchCustomers ? 'Gestión de Clientes' : 'Catálogo de Productos')
-              : (_selectedIndex == 1 ? 'Seguimiento de Pedidos' : 'Estado de Cuenta'),
+          _getTitle(_selectedIndex, canSearchCustomers),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -73,6 +77,25 @@ class _DashboardPageState extends State<DashboardPage> {
         items: navItems,
       ),
     );
+  }
+
+  String _getTitle(int index, bool canSearch) {
+    if (canSearch) {
+      switch (index) {
+        case 0: return 'Gestión de Clientes';
+        case 1: return 'Catálogo de Productos';
+        case 2: return 'Seguimiento de Pedidos';
+        case 3: return 'Estado de Cuenta';
+        default: return '';
+      }
+    } else {
+      switch (index) {
+        case 0: return 'Catálogo de Productos';
+        case 1: return 'Seguimiento de Pedidos';
+        case 2: return 'Estado de Cuenta';
+        default: return '';
+      }
+    }
   }
 
   Widget _buildDrawer(User user) {

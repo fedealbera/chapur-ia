@@ -149,7 +149,14 @@ class _ProductListItem extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       product.articleCode,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      style: TextStyle(color: Colors.grey.shade800, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      product.description,
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const Spacer(),
                     Row(
@@ -163,7 +170,7 @@ class _ProductListItem extends StatelessWidget {
                             color: Color(0xFF6366F1),
                           ),
                         ),
-                        _buildStockBadge(product.stockStatus),
+                        _buildStockBadge(product.stockStatus, product.stockQuantity),
                       ],
                     ),
                   ],
@@ -186,7 +193,7 @@ class _ProductListItem extends StatelessWidget {
     );
   }
 
-  Widget _buildStockBadge(String status) {
+  Widget _buildStockBadge(String status, int quantity) {
     Color color;
     switch (status) {
       case 'VERDE':
@@ -202,15 +209,22 @@ class _ProductListItem extends StatelessWidget {
         color = Colors.grey;
     }
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color),
+        border: Border.all(color: color.withValues(alpha: 0.5)),
       ),
-      child: Text(
-        status,
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.inventory_2_outlined, size: 12, color: color),
+          const SizedBox(width: 4),
+          Text(
+            'Stock: $quantity',
+            style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }

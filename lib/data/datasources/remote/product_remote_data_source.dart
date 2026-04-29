@@ -27,25 +27,28 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
     List<int>? brandCodes,
   }) async {
     try {
+      final isSearch = search != null && search.isNotEmpty;
+      final endpoint = isSearch ? '/products/search' : '/products';
+
       final queryParams = <String, dynamic>{
         'page': page,
         'pageSize': pageSize,
       };
-      
-      if (search != null && search.isNotEmpty) {
-        queryParams['search'] = search;
+
+      if (isSearch) {
+        queryParams['q'] = search;
       }
-      
+
       if (productTypes != null && productTypes.isNotEmpty) {
         queryParams['productType'] = productTypes;
       }
-      
+
       if (brandCodes != null && brandCodes.isNotEmpty) {
         queryParams['brandCode'] = brandCodes;
       }
 
       final response = await dio.get(
-        '/products',
+        endpoint,
         queryParameters: queryParams,
       );
 
