@@ -19,17 +19,17 @@ class CustomerModel extends Customer {
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
     return CustomerModel(
-      accountNumber: json['accountNumber'],
-      name: json['name'],
-      cuit: json['cuit'],
-      address: json['address'],
-      city: json['city'],
-      province: json['province'],
-      postalCode: json['postalCode'],
-      priceListCode: json['priceListCode'],
-      sellerCode: json['sellerCode'],
-      sellerName: json['sellerName'],
-      condicionIva: json['condicionIva'],
+      accountNumber: json['accountNumber']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      cuit: json['cuit']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      province: json['province']?.toString(),
+      postalCode: json['postalCode']?.toString(),
+      priceListCode: json['priceListCode']?.toString() ?? '',
+      sellerCode: json['sellerCode']?.toString() ?? '',
+      sellerName: json['sellerName']?.toString(),
+      condicionIva: json['condicionIva']?.toString() ?? '',
       creditLimit: (json['creditLimit'] as num?)?.toDouble(),
       currentBalance: (json['currentBalance'] as num?)?.toDouble(),
     );

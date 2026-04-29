@@ -131,8 +131,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() {
     final dio = Dio(BaseOptions(
       baseUrl: AppConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 60),
       headers: {
         'Content-Type': 'application/json',
         'Accept-Language': 'en-US',
@@ -140,6 +140,15 @@ Future<void> init() async {
     ));
     
     dio.interceptors.add(AuthInterceptor(secureStorage: sl()));
+    
+    dio.interceptors.add(LogInterceptor(
+      request: true,
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: true,
+      responseBody: true,
+      error: true,
+    ));
     
     return dio;
   });
