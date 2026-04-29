@@ -1,3 +1,4 @@
+import 'package:chapur_ia/presentation/pages/customer_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/customer/customer_bloc.dart';
@@ -70,24 +71,6 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                     return _CustomerListItem(customer: customer);
                   },
                 );
-              } else if (state is CustomerSelected) {
-                 return Center(
-                   child: Column(
-                     mainAxisAlignment: MainAxisAlignment.center,
-                     children: [
-                       const Icon(Icons.check_circle, color: Colors.green, size: 64),
-                       const SizedBox(height: 16),
-                       Text('Seleccionado: ${state.customer.name}'),
-                       const SizedBox(height: 24),
-                       ElevatedButton(
-                         onPressed: () {
-                            context.read<CustomerBloc>().add(const SearchCustomersRequested(term: '', reset: true));
-                         }, 
-                         child: const Text('Cambiar Cliente'),
-                       ),
-                     ],
-                   ),
-                 );
               }
               return const Center(child: Text('Comienza a buscar un cliente.'));
             },
@@ -117,7 +100,12 @@ class _CustomerListItem extends StatelessWidget {
         side: BorderSide(color: Colors.grey.shade200),
       ),
       onTap: () {
-        context.read<CustomerBloc>().add(SelectCustomerRequested(customer.accountNumber));
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CustomerDetailPage(customer: customer),
+          ),
+        );
       },
     );
   }

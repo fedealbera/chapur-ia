@@ -6,6 +6,7 @@ abstract class IProductRemoteDataSource {
     int page = 1,
     int pageSize = 20,
     String? search,
+    String? priceListCode,
     List<String>? productTypes,
     List<int>? brandCodes,
   });
@@ -23,6 +24,7 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
     int page = 1,
     int pageSize = 20,
     String? search,
+    String? priceListCode,
     List<String>? productTypes,
     List<int>? brandCodes,
   }) async {
@@ -37,6 +39,10 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
 
       if (isSearch) {
         queryParams['q'] = search;
+      }
+
+      if (priceListCode != null) {
+        queryParams['priceListCode'] = priceListCode;
       }
 
       if (productTypes != null && productTypes.isNotEmpty) {

@@ -13,16 +13,18 @@ abstract class ProductEvent extends Equatable {
 class FetchProductsRequested extends ProductEvent {
   final bool reset;
   final String? search;
+  final String? priceListCode;
   final List<int>? brandCodes;
 
   const FetchProductsRequested({
     this.reset = false,
     this.search,
+    this.priceListCode,
     this.brandCodes,
   });
 
   @override
-  List<Object?> get props => [reset, search, brandCodes];
+  List<Object?> get props => [reset, search, priceListCode, brandCodes];
 }
 
 class ProductDetailRequested extends ProductEvent {
@@ -53,28 +55,32 @@ class ProductListLoaded extends ProductState {
   final List<Product> products;
   final bool hasReachedMax;
   final String? search;
+  final String? priceListCode;
   final List<int>? brandCodes;
 
   const ProductListLoaded({
     required this.products,
     required this.hasReachedMax,
     this.search,
+    this.priceListCode,
     this.brandCodes,
   });
 
   @override
-  List<Object?> get props => [products, hasReachedMax, search, brandCodes];
+  List<Object?> get props => [products, hasReachedMax, search, priceListCode, brandCodes];
 
   ProductListLoaded copyWith({
     List<Product>? products,
     bool? hasReachedMax,
     String? search,
+    String? priceListCode,
     List<int>? brandCodes,
   }) {
     return ProductListLoaded(
       products: products ?? this.products,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       search: search ?? this.search,
+      priceListCode: priceListCode ?? this.priceListCode,
       brandCodes: brandCodes ?? this.brandCodes,
     );
   }
@@ -129,6 +135,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       page: _currentPage,
       pageSize: _pageSize,
       search: event.search,
+      priceListCode: event.priceListCode,
       brandCodes: event.brandCodes,
     );
 
@@ -140,6 +147,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           products: oldProducts + newProducts,
           hasReachedMax: newProducts.length < _pageSize,
           search: event.search,
+          priceListCode: event.priceListCode,
           brandCodes: event.brandCodes,
         ));
       },

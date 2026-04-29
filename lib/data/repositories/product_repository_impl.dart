@@ -15,6 +15,7 @@ class ProductRepositoryImpl implements IProductRepository {
     int page = 1,
     int pageSize = 20,
     String? search,
+    String? priceListCode,
     List<String>? productTypes,
     List<int>? brandCodes,
   }) async {
@@ -23,6 +24,7 @@ class ProductRepositoryImpl implements IProductRepository {
         page: page,
         pageSize: pageSize,
         search: search,
+        priceListCode: priceListCode,
         productTypes: productTypes,
         brandCodes: brandCodes,
       );
