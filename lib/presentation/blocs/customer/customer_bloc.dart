@@ -88,7 +88,14 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
     SearchCustomersRequested event,
     Emitter<CustomerState> emit,
   ) async {
-    if (event.term.isNotEmpty && event.term.length < 2) return;
+    if (event.term.isEmpty) {
+      if (event.reset) {
+        emit(CustomerInitial());
+      }
+      return;
+    }
+    
+    if (event.term.length < 2) return;
 
     if (event.reset) {
       _currentPage = 1;

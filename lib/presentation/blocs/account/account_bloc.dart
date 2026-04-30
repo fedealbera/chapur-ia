@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../domain/entities/account_summary.dart';
 import '../../../domain/usecases/account/account_use_cases.dart';
 
 // --- Events ---
@@ -11,19 +12,19 @@ abstract class AccountEvent extends Equatable {
 
 class FetchAccountSummaryRequested extends AccountEvent {
   final String accountNumber;
-  final DateTime fechaDesde;
-  final DateTime fechaHasta;
+  final DateTime startDate;
+  final DateTime endDate;
   final int soloPendientes;
 
   const FetchAccountSummaryRequested({
     required this.accountNumber,
-    required this.fechaDesde,
-    required this.fechaHasta,
+    required this.startDate,
+    required this.endDate,
     this.soloPendientes = 0,
   });
 
   @override
-  List<Object?> get props => [accountNumber, fechaDesde, fechaHasta, soloPendientes];
+  List<Object?> get props => [accountNumber, startDate, endDate, soloPendientes];
 }
 
 class FetchDocumentDetailRequested extends AccountEvent {
@@ -51,7 +52,7 @@ class AccountInitial extends AccountState {}
 class AccountLoading extends AccountState {}
 
 class AccountSummaryLoaded extends AccountState {
-  final Map<String, dynamic> summary;
+  final AccountSummary summary;
   const AccountSummaryLoaded(this.summary);
   @override
   List<Object?> get props => [summary];
@@ -91,8 +92,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     emit(AccountLoading());
     final result = await getAccountSummaryUseCase.execute(
       accountNumber: event.accountNumber,
-      fechaDesde: event.fechaDesde,
-      fechaHasta: event.fechaHasta,
+      startDate: event.startDate,
+      endDate: event.endDate,
       soloPendientes: event.soloPendientes,
     );
 

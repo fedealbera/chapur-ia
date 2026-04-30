@@ -1,4 +1,5 @@
 import 'package:chapur_ia/presentation/pages/product_catalog_page.dart';
+import 'package:chapur_ia/presentation/pages/account_summary_page.dart';
 import 'package:flutter/material.dart';
 import 'package:chapur_ia/domain/entities/customer.dart';
 
@@ -49,7 +50,7 @@ class CustomerDetailPage extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.2),
+            backgroundColor: const Color(0xFF6366F1).withOpacity(0.2),
             child: const Icon(Icons.business, color: Color(0xFF6366F1), size: 40),
           ),
           const SizedBox(height: 16),
@@ -157,9 +158,11 @@ class CustomerDetailPage extends StatelessWidget {
           Icons.account_balance_wallet_outlined,
           const Color(0xFF1A1F2C),
           () {
-            // TODO: Navigate to Account Summary for this customer
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Analizaremos la cuenta corriente después.')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AccountSummaryPage(customer: customer),
+              ),
             );
           },
         ),

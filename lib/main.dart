@@ -6,6 +6,7 @@ import 'presentation/blocs/product/product_bloc.dart';
 import 'presentation/blocs/customer/customer_bloc.dart';
 import 'presentation/blocs/order/order_bloc.dart';
 import 'presentation/blocs/account/account_bloc.dart';
+import 'presentation/blocs/cart/cart_bloc.dart';
 import 'presentation/pages/login_page.dart';
 import 'presentation/pages/dashboard_page.dart';
 
@@ -27,6 +28,7 @@ class ChapurApp extends StatelessWidget {
         BlocProvider(create: (_) => di.sl<CustomerBloc>()),
         BlocProvider(create: (_) => di.sl<OrderBloc>()),
         BlocProvider(create: (_) => di.sl<AccountBloc>()),
+        BlocProvider(create: (_) => di.sl<CartBloc>()),
       ],
       child: MaterialApp(
         title: 'Chapur IA — Fuerza de Ventas',

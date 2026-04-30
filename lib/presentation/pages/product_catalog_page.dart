@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/product/product_bloc.dart';
+import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
 import 'package:chapur_ia/domain/entities/product.dart';
 import 'package:chapur_ia/domain/entities/customer.dart';
+import 'package:chapur_ia/domain/entities/cart_item.dart';
 
 class ProductCatalogPage extends StatefulWidget {
   final Customer? customer;
@@ -100,34 +102,50 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
           ),
         ),
         Expanded(
-          child: BlocBuilder<ProductBloc, ProductState>(
-            builder: (context, state) {
-              if (state is ProductLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is ProductFailure) {
-                return Center(child: Text('Error: ${state.message}'));
-              } else if (state is ProductListLoaded) {
-                if (state.products.isEmpty) {
-                  return const Center(child: Text('No se encontraron productos.'));
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<CartBloc, CartState>(
+                listener: (context, state) {
+                  if (state is CartFailure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+                    );
+                  } else if (state is CartLoaded) {
+                    // Feedback handled locally in the item for now, 
+                    // but we could add a floating button or something here.
+                  }
+                },
+              ),
+            ],
+            child: BlocBuilder<ProductBloc, ProductState>(
+              builder: (context, state) {
+                if (state is ProductLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is ProductFailure) {
+                  return Center(child: Text('Error: ${state.message}'));
+                } else if (state is ProductListLoaded) {
+                  if (state.products.isEmpty) {
+                    return const Center(child: Text('No se encontraron productos.'));
+                  }
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: state.hasReachedMax ? state.products.length : state.products.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index >= state.products.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 32),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final product = state.products[index];
+                      return _ProductListItem(product: product);
+                    },
+                  );
                 }
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: state.hasReachedMax ? state.products.length : state.products.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index >= state.products.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 32),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
-                    final product = state.products[index];
-                    return _ProductListItem(product: product);
-                  },
-                );
-              }
-              return const SizedBox.shrink();
-            },
+                return const SizedBox.shrink();
+              },
+            ),
           ),
         ),
       ],
@@ -201,7 +219,7 @@ class _ProductListItemState extends State<_ProductListItem> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -306,14 +324,29 @@ class _ProductListItemState extends State<_ProductListItem> {
                 ),
                 ElevatedButton(
                   onPressed: _quantity > 0 ? () {
-                    // TODO: Add to cart logic
+                    context.read<CartBloc>().add(
+                      AddToCartRequested(
+                        CartItem(
+                          articleCode: widget.product.articleCode,
+                          quantity: _quantity,
+                          name: widget.product.name,
+                          unitPrice: widget.product.unitPrice,
+                        ),
+                      ),
+                    );
+                    
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Agregado: $_quantity x ${widget.product.name}'),
                         backgroundColor: primaryRed,
                         behavior: SnackBarBehavior.floating,
+                        duration: const Duration(seconds: 1),
                       ),
                     );
+                    
+                    setState(() {
+                      _quantity = 0; // Reset after adding
+                    });
                   } : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryRed,
@@ -376,7 +409,7 @@ class _ProductListItemState extends State<_ProductListItem> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

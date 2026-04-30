@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:chapur_ia/core/error/failures.dart';
-import 'package:chapur_ia/data/models/cart_model.dart';
+import 'package:chapur_ia/domain/entities/cart.dart';
+import 'package:chapur_ia/domain/entities/cart_item.dart';
 
 abstract class ICartRepository {
-  Future<Either<Failure, CartModel>> getCart();
-  Future<Either<Failure, void>> addToCart(String articleCode, int quantity);
-  Future<Either<Failure, void>> removeFromCart(String articleCode);
+  Future<Either<Failure, Cart>> getCart();
+  Future<Either<Failure, void>> addItem(CartItem item);
   Future<Either<Failure, void>> clearCart();
 }

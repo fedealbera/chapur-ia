@@ -17,10 +17,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   @override
   void initState() {
     super.initState();
-    // Carga inicial de todos los clientes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CustomerBloc>().add(const SearchCustomersRequested(term: '', reset: true));
-    });
+    // No cargamos clientes inicialmente para evitar errores de búsqueda vacía
   }
 
   @override
@@ -33,6 +30,32 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Container(
+          width: double.infinity,
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          padding: const EdgeInsets.all(12),
+          decoration: const BoxDecoration(
+            color: Color(0x1A6366F1),
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+            border: Border.fromBorderSide(BorderSide(color: Color(0x336366F1))),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.info_outline, color: Color(0xFF6366F1), size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Ingrese al menos 2 caracteres para buscar clientes por nombre, CUIT o número de cuenta.',
+                  style: TextStyle(
+                    color: Color(0xFF4338CA),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: TextField(
@@ -42,12 +65,10 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
               prefixIcon: const Icon(Icons.person_search_outlined),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               filled: true,
-              fillColor: Colors.grey.shade50,
+              fillColor: const Color(0xFFFAFAFA), // Colors.grey.shade50
             ),
             onChanged: (value) {
-              if (value.isEmpty || value.length >= 2) {
-                context.read<CustomerBloc>().add(SearchCustomersRequested(term: value, reset: true));
-              }
+              context.read<CustomerBloc>().add(SearchCustomersRequested(term: value, reset: true));
             },
           ),
         ),
@@ -72,7 +93,19 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                   },
                 );
               }
-              return const Center(child: Text('Comienza a buscar un cliente.'));
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search, size: 64, color: Color(0xFFE0E0E0)),
+                    SizedBox(height: 16),
+                    Text(
+                      'Comience a escribir para buscar un cliente',
+                      style: TextStyle(color: Color(0xFF757575), fontSize: 16),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ),
@@ -88,16 +121,16 @@ class _CustomerListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: const Color(0xFF6366F1).withValues(alpha: 0.1),
-        child: const Icon(Icons.business, color: Color(0xFF6366F1)),
+      leading: const CircleAvatar(
+        backgroundColor: Color(0x1A6366F1),
+        child: Icon(Icons.business, color: Color(0xFF6366F1)),
       ),
       title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text('Cuenta: ${customer.accountNumber} | CUIT: ${customer.cuit}'),
       trailing: const Icon(Icons.chevron_right),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+        side: const BorderSide(color: Color(0xFFEEEEEE)), // Colors.grey.shade200
       ),
       onTap: () {
         Navigator.push(

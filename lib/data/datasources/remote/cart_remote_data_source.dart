@@ -3,8 +3,7 @@ import 'package:chapur_ia/data/models/cart_model.dart';
 
 abstract class ICartRemoteDataSource {
   Future<CartModel> getCart();
-  Future<void> addToCart(String articleCode, int quantity);
-  Future<void> removeFromCart(String articleCode);
+  Future<void> addItem(CartItemModel item);
   Future<void> clearCart();
 }
 
@@ -19,29 +18,17 @@ class CartRemoteDataSourceImpl implements ICartRemoteDataSource {
       final response = await dio.get('/cart');
       return CartModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
-      rethrow;
+      // If the cart doesn't exist yet, we might get a 404 or empty response.
+      // Based on user info, GET /api/cart creates it if not exists or just returns OK.
+      // We'll return an empty cart if it fails or if data is missing.
+      return const CartModel(items: [], totalAmount: 0.0);
     }
   }
 
   @override
-  Future<void> addToCart(String articleCode, int quantity) async {
+  Future<void> addItem(CartItemModel item) async {
     try {
-      await dio.post(
-        '/cart/items',
-        data: {
-          'articleCode': articleCode,
-          'quantity': quantity,
-        },
-      );
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> removeFromCart(String articleCode) async {
-    try {
-      await dio.delete('/cart/items/$articleCode');
+      await dio.post('/cart/items', data: item.toJson());
     } catch (e) {
       rethrow;
     }
