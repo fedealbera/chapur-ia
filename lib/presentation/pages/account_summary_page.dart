@@ -9,6 +9,7 @@ import '../../domain/entities/account_movement.dart';
 import '../blocs/account/account_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
 import 'document_detail_page.dart';
+import '../../injection_container.dart';
 
 class AccountSummaryPage extends StatefulWidget {
   final Customer? customer;
@@ -83,9 +84,12 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => DocumentDetailPage(
-          documentCode: movement.codigoCompro,
-          documentNumber: movement.numeroCompro,
+        builder: (_) => BlocProvider(
+          create: (_) => sl<AccountBloc>(),
+          child: DocumentDetailPage(
+            documentCode: movement.codigoCompro,
+            documentNumber: movement.numeroCompro,
+          ),
         ),
       ),
     );
