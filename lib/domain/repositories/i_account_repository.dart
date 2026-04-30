@@ -9,4 +9,14 @@ abstract class IAccountRepository {
     required DateTime endDate,
     int soloPendientes = 0,
   });
+
+  Future<Either<Failure, Map<String, dynamic>>> getDocumentDetail({
+    required String documentCode,
+    required int documentNumber,
+  });
+
+  Future<Either<Failure, String>> getDocumentPdfPath({
+    required String documentCode,
+    required int documentNumber,
+  });
 }

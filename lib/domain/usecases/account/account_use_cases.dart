@@ -28,11 +28,29 @@ class GetDocumentDetailUseCase {
 
   GetDocumentDetailUseCase(this.repository);
 
-  // This is a placeholder for now as per the existing codebase
   Future<Either<Failure, Map<String, dynamic>>> execute({
     required String documentCode,
     required int documentNumber,
-  }) async {
-    return const Left(ServerFailure('Not implemented yet'));
+  }) {
+    return repository.getDocumentDetail(
+      documentCode: documentCode,
+      documentNumber: documentNumber,
+    );
+  }
+}
+
+class GetDocumentPdfUseCase {
+  final IAccountRepository repository;
+
+  GetDocumentPdfUseCase(this.repository);
+
+  Future<Either<Failure, String>> execute({
+    required String documentCode,
+    required int documentNumber,
+  }) {
+    return repository.getDocumentPdfPath(
+      documentCode: documentCode,
+      documentNumber: documentNumber,
+    );
   }
 }

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:open_filex/open_filex.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/entities/account_summary.dart';
 import '../../domain/entities/account_movement.dart';
 import '../blocs/account/account_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
+import 'document_detail_page.dart';
 
 class AccountSummaryPage extends StatefulWidget {
   final Customer? customer;
@@ -39,7 +42,6 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
       return;
     }
 
-    // Si no hay cliente en el widget, intentamos obtenerlo del estado de autenticación (si el usuario es un cliente)
     final authState = context.read<AuthBloc>().state;
     if (authState is Authenticated && authState.user.customerAccountNumber != null) {
       context.read<AccountBloc>().add(FetchAccountSummaryRequested(
@@ -70,6 +72,27 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
     }
   }
 
+  void _onDownloadPdf(AccountMovement movement) {
+    context.read<AccountBloc>().add(DownloadDocumentPdfRequested(
+          documentCode: movement.codigoCompro,
+          documentNumber: movement.numeroCompro,
+        ));
+  }
+
+  void _onVisualizeDetail(AccountMovement movement) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DocumentDetailPage(
+          documentCode: movement.codigoCompro,
+          documentNumber: movement.numeroCompro,
+        ),
+      ),
+    );
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,54 +101,52 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
         backgroundColor: const Color(0xFF1A1F2C),
         foregroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          _buildDateFilters(),
-          Expanded(
-            child: BlocBuilder<AccountBloc, AccountState>(
-              builder: (context, state) {
-                if (state is AccountSummaryLoaded) {
-                  return _buildContent(state.summary);
-                } else if (state is AccountLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is AccountFailure) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24.0),
+      body: BlocListener<AccountBloc, AccountState>(
+        listener: (context, state) {
+          if (state is DocumentPdfLoaded) {
+            Share.shareXFiles([XFile(state.filePath)], text: 'Comprobante PDF');
+          } else if (state is AccountFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+            );
+          }
+        },
+        child: Column(
+          children: [
+            _buildDateFilters(),
+            Expanded(
+              child: BlocBuilder<AccountBloc, AccountState>(
+                builder: (context, state) {
+                  if (state is AccountSummaryLoaded) {
+                    return _buildContent(state.summary);
+                  } else if (state is AccountLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  // Return content with current state data if available or initial message
+                  if (state is AccountInitial) {
+                    return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                          Icon(Icons.account_balance_wallet_outlined, size: 64, color: Colors.grey.shade300),
                           const SizedBox(height: 16),
-                          Text(state.message, textAlign: TextAlign.center),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: _fetchSummary,
-                            child: const Text('Reintentar'),
+                          const Text(
+                            'Seleccione un cliente para ver su estado de cuenta.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
-                    ),
-                  );
-                }
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.account_balance_wallet_outlined, size: 64, color: Colors.grey.shade300),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Seleccione un cliente para ver su estado de cuenta.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                    );
+                  }
+                  // If we are in another state but were previously loaded, we might want to keep the list
+                  // But BLoC logic here is simple, so we just show loading or failure if not loaded.
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -206,7 +227,11 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final movement = summary.movements[index];
-                  return _MovementCard(movement: movement);
+                  return _MovementCard(
+                    movement: movement,
+                    onVisualize: () => _onVisualizeDetail(movement),
+                    onDownload: () => _onDownloadPdf(movement),
+                  );
                 },
                 childCount: summary.movements.length,
               ),
@@ -335,8 +360,14 @@ class _DateSelector extends StatelessWidget {
 
 class _MovementCard extends StatelessWidget {
   final AccountMovement movement;
+  final VoidCallback onVisualize;
+  final VoidCallback onDownload;
 
-  const _MovementCard({required this.movement});
+  const _MovementCard({
+    required this.movement,
+    required this.onVisualize,
+    required this.onDownload,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -402,6 +433,29 @@ class _MovementCard extends StatelessWidget {
                 _buildAmount('DEBE', movement.debeN, Colors.black87),
                 _buildAmount('HABER', movement.haberN, Colors.black87),
                 _buildAmount('SALDO', movement.saldoN, const Color(0xFF6366F1), isBold: true),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: onVisualize,
+                  icon: const Icon(Icons.visibility_outlined, size: 18),
+                  label: const Text('Ver'),
+                  style: TextButton.styleFrom(foregroundColor: const Color(0xFF6366F1)),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton.icon(
+                  onPressed: onDownload,
+                  icon: const Icon(Icons.share_outlined, size: 18),
+                  label: const Text('Compartir'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1A1F2C),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
               ],
             ),
           ],

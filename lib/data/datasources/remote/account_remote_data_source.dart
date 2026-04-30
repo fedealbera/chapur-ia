@@ -10,6 +10,8 @@ abstract class IAccountRemoteDataSource {
   });
 
   Future<Map<String, dynamic>> getDocumentDetail(String documentCode, int documentNumber);
+  
+  Future<List<int>> getDocumentPdf(String documentCode, int documentNumber);
 }
 
 class AccountRemoteDataSourceImpl implements IAccountRemoteDataSource {
@@ -48,6 +50,20 @@ class AccountRemoteDataSourceImpl implements IAccountRemoteDataSource {
     try {
       final response = await dio.get('/cuenta-corriente/comprobante/$documentCode/$documentNumber');
       return response.data as Map<String, dynamic>;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<int>> getDocumentPdf(String documentCode, int documentNumber) async {
+    try {
+      final response = await dio.get(
+        '/cuenta-corriente/comprobante/$documentCode/$documentNumber/pdf',
+        queryParameters: {'download': true},
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return response.data as List<int>;
     } catch (e) {
       rethrow;
     }

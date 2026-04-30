@@ -106,9 +106,11 @@ Future<void> init() async {
   sl.registerFactory(() => AccountBloc(
         getAccountSummaryUseCase: sl(),
         getDocumentDetailUseCase: sl(),
+        getDocumentPdfUseCase: sl(),
       ));
   sl.registerLazySingleton(() => GetAccountSummaryUseCase(sl()));
   sl.registerLazySingleton(() => GetDocumentDetailUseCase(sl()));
+  sl.registerLazySingleton(() => GetDocumentPdfUseCase(sl()));
   sl.registerLazySingleton<IAccountRepository>(
       () => AccountRepositoryImpl(remoteDataSource: sl()));
   sl.registerLazySingleton<IAccountRemoteDataSource>(

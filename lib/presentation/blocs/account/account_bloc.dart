@@ -40,6 +40,19 @@ class FetchDocumentDetailRequested extends AccountEvent {
   List<Object?> get props => [documentCode, documentNumber];
 }
 
+class DownloadDocumentPdfRequested extends AccountEvent {
+  final String documentCode;
+  final int documentNumber;
+
+  const DownloadDocumentPdfRequested({
+    required this.documentCode,
+    required this.documentNumber,
+  });
+
+  @override
+  List<Object?> get props => [documentCode, documentNumber];
+}
+
 // --- States ---
 abstract class AccountState extends Equatable {
   const AccountState();
@@ -65,6 +78,13 @@ class DocumentDetailLoaded extends AccountState {
   List<Object?> get props => [detail];
 }
 
+class DocumentPdfLoaded extends AccountState {
+  final String filePath;
+  const DocumentPdfLoaded(this.filePath);
+  @override
+  List<Object?> get props => [filePath];
+}
+
 class AccountFailure extends AccountState {
   final String message;
   const AccountFailure(this.message);
@@ -76,13 +96,16 @@ class AccountFailure extends AccountState {
 class AccountBloc extends Bloc<AccountEvent, AccountState> {
   final GetAccountSummaryUseCase getAccountSummaryUseCase;
   final GetDocumentDetailUseCase getDocumentDetailUseCase;
+  final GetDocumentPdfUseCase getDocumentPdfUseCase;
 
   AccountBloc({
     required this.getAccountSummaryUseCase,
     required this.getDocumentDetailUseCase,
+    required this.getDocumentPdfUseCase,
   }) : super(AccountInitial()) {
     on<FetchAccountSummaryRequested>(_onFetchSummary);
     on<FetchDocumentDetailRequested>(_onFetchDetail);
+    on<DownloadDocumentPdfRequested>(_onDownloadPdf);
   }
 
   Future<void> _onFetchSummary(
@@ -116,6 +139,22 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     result.fold(
       (failure) => emit(AccountFailure(failure.message)),
       (detail) => emit(DocumentDetailLoaded(detail)),
+    );
+  }
+
+  Future<void> _onDownloadPdf(
+    DownloadDocumentPdfRequested event,
+    Emitter<AccountState> emit,
+  ) async {
+    emit(AccountLoading());
+    final result = await getDocumentPdfUseCase.execute(
+      documentCode: event.documentCode,
+      documentNumber: event.documentNumber,
+    );
+
+    result.fold(
+      (failure) => emit(AccountFailure(failure.message)),
+      (path) => emit(DocumentPdfLoaded(path)),
     );
   }
 }
