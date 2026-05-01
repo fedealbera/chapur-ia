@@ -58,7 +58,11 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
         queryParameters: queryParams,
       );
 
-      return response.data as Map<String, dynamic>;
+      if (response.data is Map<String, dynamic>) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw const FormatException('La respuesta del servidor no tiene el formato esperado.');
+      }
     } catch (e) {
       rethrow;
     }
@@ -68,7 +72,11 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
   Future<ProductModel> getProductDetail(String productType, String articleCode) async {
     try {
       final response = await dio.get('/products/$productType/$articleCode');
-      return ProductModel.fromJson(response.data as Map<String, dynamic>);
+      if (response.data is Map<String, dynamic>) {
+        return ProductModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw const FormatException('La respuesta del servidor no tiene el formato esperado.');
+      }
     } catch (e) {
       rethrow;
     }

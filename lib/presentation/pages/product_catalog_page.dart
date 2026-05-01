@@ -122,10 +122,10 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
                 if (state is ProductLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ProductFailure) {
-                  return Center(child: Text('Error: ${state.message}'));
+                  return _buildErrorState(state.message);
                 } else if (state is ProductListLoaded) {
                   if (state.products.isEmpty) {
-                    return const Center(child: Text('No se encontraron productos.'));
+                    return _buildEmptyState();
                   }
                   return ListView.builder(
                     controller: _scrollController,
@@ -170,6 +170,94 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
     }
 
     return content;
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                color: Color(0xFFCE1126),
+                size: 64,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'No se pudo cargar el catálogo',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  context.read<ProductBloc>().add(FetchProductsRequested(
+                        reset: true,
+                        search: _searchController.text,
+                        priceListCode: widget.customer?.priceListCode,
+                      ));
+                },
+                icon: const Icon(Icons.refresh_rounded),
+                label: const Text('REINTENTAR'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFCE1126),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off_rounded, size: 64, color: Colors.grey.shade300),
+          const SizedBox(height: 16),
+          const Text(
+            'No se encontraron productos',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -219,7 +307,7 @@ class _ProductListItemState extends State<_ProductListItem> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -409,7 +497,7 @@ class _ProductListItemState extends State<_ProductListItem> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

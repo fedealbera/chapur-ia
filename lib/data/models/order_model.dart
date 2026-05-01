@@ -11,9 +11,9 @@ class OrderItemModel extends OrderItem {
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      articleCode: json['articleCode'],
-      description: json['description'],
-      quantity: json['quantity'],
+      articleCode: json['articleCode']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      quantity: json['quantity'] ?? 0,
       unitPrice: (json['unitPrice'] as num).toDouble(),
       subtotal: (json['subtotal'] as num).toDouble(),
     );
@@ -45,13 +45,13 @@ class OrderModel extends Order {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: json['id'],
-      orderNumber: json['orderNumber'],
-      legacyOrderId: json['legacyOrderId'],
-      customerAccountNumber: json['customerAccountNumber'],
-      customerName: json['customerName'],
+      id: json['id']?.toString() ?? '',
+      orderNumber: json['orderNumber']?.toString() ?? '',
+      legacyOrderId: json['legacyOrderId']?.toString() ?? '',
+      customerAccountNumber: json['customerAccountNumber']?.toString() ?? '',
+      customerName: json['customerName']?.toString() ?? '',
       date: DateTime.parse(json['date']),
-      status: json['status'],
+      status: json['status']?.toString() ?? '',
       total: (json['total'] as num).toDouble(),
       items: (json['items'] as List<dynamic>?)
               ?.map((item) => OrderItemModel.fromJson(item))

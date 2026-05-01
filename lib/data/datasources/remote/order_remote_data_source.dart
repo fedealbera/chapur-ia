@@ -26,7 +26,11 @@ class OrderRemoteDataSourceImpl implements IOrderRemoteDataSource {
         queryParams['accountNumber'] = accountNumber;
       }
       final response = await dio.get('/orders', queryParameters: queryParams);
-      return (response.data as List).map((e) => OrderModel.fromJson(e)).toList();
+      if (response.data is List) {
+        return (response.data as List).map((e) => OrderModel.fromJson(e)).toList();
+      } else {
+        throw const FormatException('La respuesta del servidor no tiene el formato esperado.');
+      }
     } catch (e) {
       rethrow;
     }
@@ -36,7 +40,11 @@ class OrderRemoteDataSourceImpl implements IOrderRemoteDataSource {
   Future<OrderModel> getOrderDetail(String id) async {
     try {
       final response = await dio.get('/orders/$id');
-      return OrderModel.fromJson(response.data as Map<String, dynamic>);
+      if (response.data is Map<String, dynamic>) {
+        return OrderModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw const FormatException('La respuesta del servidor no tiene el formato esperado.');
+      }
     } catch (e) {
       rethrow;
     }

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import '../../core/error/failures.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/repositories/i_product_repository.dart';
@@ -34,7 +35,15 @@ class ProductRepositoryImpl implements IProductRepository {
 
       return Right(products);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      if (e is DioException) {
+        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+          return const Left(ServerFailure('El servidor tardó demasiado en responder. Reintente en unos momentos.'));
+        }
+        return Left(ServerFailure('Error de red: ${e.message}'));
+      } else if (e is FormatException) {
+        return Left(ServerFailure(e.message));
+      }
+      return const Left(ServerFailure('Ocurrió un error inesperado al cargar los productos.'));
     }
   }
 
@@ -47,7 +56,13 @@ class ProductRepositoryImpl implements IProductRepository {
       final product = await remoteDataSource.getProductDetail(productType, articleCode);
       return Right(product);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      if (e is DioException) {
+        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+          return const Left(ServerFailure('El servidor tardó demasiado en responder. Reintente en unos momentos.'));
+        }
+        return Left(ServerFailure('Error de red: ${e.message}'));
+      }
+      return const Left(ServerFailure('Ocurrió un error inesperado al cargar el detalle del producto.'));
     }
   }
 }

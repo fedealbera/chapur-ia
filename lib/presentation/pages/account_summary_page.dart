@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:open_filex/open_filex.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/entities/account_summary.dart';
 import '../../domain/entities/account_movement.dart';
@@ -94,8 +93,6 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
       ),
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +257,7 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
