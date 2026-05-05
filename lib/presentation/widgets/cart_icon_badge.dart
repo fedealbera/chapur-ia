@@ -18,6 +18,7 @@ class CartIconBadge extends StatelessWidget {
         }
 
         return Stack(
+          clipBehavior: Clip.none,
           alignment: Alignment.center,
           children: [
             IconButton(
@@ -37,26 +38,28 @@ class CartIconBadge extends StatelessWidget {
             ),
             if (count > 0)
               Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
-                  child: Text(
-                    '$count',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                right: 6,
+                top: 6,
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    textAlign: TextAlign.center,
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               ),
