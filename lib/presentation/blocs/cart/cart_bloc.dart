@@ -141,7 +141,15 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     final result = await clearCartUseCase.execute();
     result.fold(
       (failure) => emit(CartFailure(failure.message)),
-      (_) => emit(const CartLoaded(Cart(items: [], subtotal: 0.0, ivaTotal: 0.0, grandTotal: 0.0))),
+      (_) => emit(const CartLoaded(Cart(
+            items: [],
+            subtotal: 0.0,
+            ivaTotal: 0.0,
+            grandTotal: 0.0,
+            subtotalUsd: 0.0,
+            ivaTotalUsd: 0.0,
+            grandTotalUsd: 0.0,
+          ))),
     );
   }
 }

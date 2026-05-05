@@ -3,8 +3,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../blocs/cart/cart_bloc.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  // USD currency formatter
+  final _usdFormat = NumberFormat.currency(locale: 'en_US', symbol: 'USD ');
+
+  @override
+  void initState() {
+    super.initState();
+    // Refresh cart every time the page is opened to reflect web-side changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CartBloc>().add(LoadCartRequested());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,23 +84,42 @@ class CartPage extends StatelessWidget {
                     separatorBuilder: (_, __) => const Divider(),
                     itemBuilder: (context, index) {
                       final item = cart.items[index];
+                      final unitPriceUsd = item.priceUsd ?? 0.0;
+                      final subtotalUsd = item.subtotalUsd ?? (item.quantity * unitPriceUsd);
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: Text(item.description ?? 'Producto', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        title: Text(
+                          item.description ?? 'Producto',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 4),
                             Text('Código: ${item.articleCode}', style: const TextStyle(fontSize: 12)),
-                            Text('Cantidad: ${item.quantity} x \$${(item.unitPrice ?? 0).toStringAsFixed(2)}'),
+                            Text(
+                              'Cantidad: ${item.quantity} x ${_usdFormat.format(unitPriceUsd)}',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            if (item.ivaRate != null)
+                              Text(
+                                'IVA: ${item.ivaRate!.toStringAsFixed(1)}%  (${_usdFormat.format(item.ivaAmountUsd ?? 0.0)})',
+                                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                              ),
                           ],
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              '\$${(item.subtotal ?? (item.quantity * (item.unitPrice ?? 0))).toStringAsFixed(2)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6366F1)),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  _usdFormat.format(subtotalUsd),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6366F1), fontSize: 13),
+                                ),
+                              ],
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
@@ -97,6 +133,7 @@ class CartPage extends StatelessWidget {
                     },
                   ),
                 ),
+                // ─── Totals panel ─────────────────────────────────────────
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -113,11 +150,11 @@ class CartPage extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _buildSummaryRow('Subtotal', cart.subtotal),
+                        _buildSummaryRow('Subtotal', cart.subtotalUsd),
                         const SizedBox(height: 8),
-                        _buildSummaryRow('IVA Total', cart.ivaTotal),
+                        _buildSummaryRow('IVA Total', cart.ivaTotalUsd),
                         const Divider(height: 24),
-                        _buildSummaryRow('TOTAL', cart.grandTotal, isTotal: true),
+                        _buildSummaryRow('TOTAL', cart.grandTotalUsd, isTotal: true),
                         const SizedBox(height: 24),
                         SizedBox(
                           width: double.infinity,
@@ -143,7 +180,7 @@ class CartPage extends StatelessWidget {
               ],
             );
           }
-          return const Center(child: Text('Cargando carrito...'));
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
@@ -162,10 +199,10 @@ class CartPage extends StatelessWidget {
           ),
         ),
         Text(
-          NumberFormat.currency(symbol: '\$').format(amount),
+          _usdFormat.format(amount),
           style: TextStyle(
             fontSize: isTotal ? 20 : 16,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.bold,
+            fontWeight: FontWeight.bold,
             color: isTotal ? const Color(0xFF6366F1) : Colors.black,
           ),
         ),

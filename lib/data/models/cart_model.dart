@@ -8,6 +8,12 @@ class CartItemModel extends CartItem {
     super.description,
     super.unitPrice,
     super.subtotal,
+    super.priceUsd,
+    super.subtotalUsd,
+    super.ivaRate,
+    super.ivaAmount,
+    super.ivaAmountUsd,
+    super.stockStatus,
   });
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
@@ -17,6 +23,12 @@ class CartItemModel extends CartItem {
       description: json['description']?.toString(),
       unitPrice: (json['price'] as num?)?.toDouble(),
       subtotal: (json['subtotal'] as num?)?.toDouble(),
+      priceUsd: (json['priceUsd'] as num?)?.toDouble(),
+      subtotalUsd: (json['subtotalUsd'] as num?)?.toDouble(),
+      ivaRate: (json['ivaRate'] as num?)?.toDouble(),
+      ivaAmount: (json['ivaAmount'] as num?)?.toDouble(),
+      ivaAmountUsd: (json['ivaAmountUsd'] as num?)?.toDouble(),
+      stockStatus: json['stockStatus']?.toString(),
     );
   }
 
@@ -34,6 +46,9 @@ class CartModel extends Cart {
     required super.subtotal,
     required super.ivaTotal,
     required super.grandTotal,
+    super.subtotalUsd,
+    super.ivaTotalUsd,
+    super.grandTotalUsd,
     super.customerAccountNumber,
     super.customerName,
   });
@@ -48,6 +63,9 @@ class CartModel extends Cart {
       subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
       ivaTotal: (json['ivaTotal'] as num?)?.toDouble() ?? 0.0,
       grandTotal: (json['grandTotal'] as num?)?.toDouble() ?? 0.0,
+      subtotalUsd: (json['subtotalUsd'] as num?)?.toDouble() ?? 0.0,
+      ivaTotalUsd: (json['ivaTotalUsd'] as num?)?.toDouble() ?? 0.0,
+      grandTotalUsd: (json['grandTotalUsd'] as num?)?.toDouble() ?? 0.0,
       customerAccountNumber: json['customerAccountNumber']?.toString(),
       customerName: json['customerName']?.toString(),
     );

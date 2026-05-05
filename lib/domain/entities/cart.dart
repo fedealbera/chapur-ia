@@ -6,6 +6,10 @@ class Cart extends Equatable {
   final double subtotal;
   final double ivaTotal;
   final double grandTotal;
+  // USD totals from API
+  final double subtotalUsd;
+  final double ivaTotalUsd;
+  final double grandTotalUsd;
   final String? customerAccountNumber;
   final String? customerName;
 
@@ -14,6 +18,9 @@ class Cart extends Equatable {
     required this.subtotal,
     required this.ivaTotal,
     required this.grandTotal,
+    this.subtotalUsd = 0.0,
+    this.ivaTotalUsd = 0.0,
+    this.grandTotalUsd = 0.0,
     this.customerAccountNumber,
     this.customerName,
   });
@@ -24,12 +31,15 @@ class Cart extends Equatable {
         subtotal,
         ivaTotal,
         grandTotal,
+        subtotalUsd,
+        ivaTotalUsd,
+        grandTotalUsd,
         customerAccountNumber,
         customerName,
       ];
 
-  int get totalItems => items.fold(0, (sum, item) => sum + item.quantity);
-  
+  int get totalItems => items.length;
+
   // For backward compatibility or convenience
   double get totalAmount => grandTotal;
 }

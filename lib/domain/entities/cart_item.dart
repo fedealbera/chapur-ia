@@ -6,6 +6,13 @@ class CartItem extends Equatable {
   final String? description;
   final double? unitPrice;
   final double? subtotal;
+  // USD fields from API
+  final double? priceUsd;
+  final double? subtotalUsd;
+  final double? ivaRate;
+  final double? ivaAmount;
+  final double? ivaAmountUsd;
+  final String? stockStatus;
 
   const CartItem({
     required this.articleCode,
@@ -13,10 +20,28 @@ class CartItem extends Equatable {
     this.description,
     this.unitPrice,
     this.subtotal,
+    this.priceUsd,
+    this.subtotalUsd,
+    this.ivaRate,
+    this.ivaAmount,
+    this.ivaAmountUsd,
+    this.stockStatus,
   });
 
   @override
-  List<Object?> get props => [articleCode, quantity, description, unitPrice, subtotal];
+  List<Object?> get props => [
+        articleCode,
+        quantity,
+        description,
+        unitPrice,
+        subtotal,
+        priceUsd,
+        subtotalUsd,
+        ivaRate,
+        ivaAmount,
+        ivaAmountUsd,
+        stockStatus,
+      ];
 
   CartItem copyWith({
     String? articleCode,
@@ -24,6 +49,12 @@ class CartItem extends Equatable {
     String? description,
     double? unitPrice,
     double? subtotal,
+    double? priceUsd,
+    double? subtotalUsd,
+    double? ivaRate,
+    double? ivaAmount,
+    double? ivaAmountUsd,
+    String? stockStatus,
   }) {
     return CartItem(
       articleCode: articleCode ?? this.articleCode,
@@ -31,6 +62,12 @@ class CartItem extends Equatable {
       description: description ?? this.description,
       unitPrice: unitPrice ?? this.unitPrice,
       subtotal: subtotal ?? this.subtotal,
+      priceUsd: priceUsd ?? this.priceUsd,
+      subtotalUsd: subtotalUsd ?? this.subtotalUsd,
+      ivaRate: ivaRate ?? this.ivaRate,
+      ivaAmount: ivaAmount ?? this.ivaAmount,
+      ivaAmountUsd: ivaAmountUsd ?? this.ivaAmountUsd,
+      stockStatus: stockStatus ?? this.stockStatus,
     );
   }
 }

@@ -23,9 +23,15 @@ class CartIconBadge extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.shopping_cart_outlined, color: color),
               onPressed: () {
+                final cartBloc = context.read<CartBloc>();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const CartPage()),
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider.value(
+                      value: cartBloc,
+                      child: const CartPage(),
+                    ),
+                  ),
                 );
               },
             ),
