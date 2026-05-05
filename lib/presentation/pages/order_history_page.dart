@@ -91,7 +91,9 @@ class _OrderListItem extends StatelessWidget {
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () {
-          // TODO: Order details view
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Detalle de pedido próximamente')),
+          );
         },
       ),
     );

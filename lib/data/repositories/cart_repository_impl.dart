@@ -36,6 +36,26 @@ class CartRepositoryImpl implements ICartRepository {
   }
 
   @override
+  Future<Either<Failure, void>> removeItem(String articleCode) async {
+    try {
+      await remoteDataSource.removeItem(articleCode);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> selectCustomer(String customerAccountNumber) async {
+    try {
+      await remoteDataSource.selectCustomer(customerAccountNumber);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> clearCart() async {
     try {
       await remoteDataSource.clearCart();

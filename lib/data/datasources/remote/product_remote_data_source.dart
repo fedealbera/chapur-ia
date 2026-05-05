@@ -24,26 +24,31 @@ class ProductRemoteDataSourceImpl implements IProductRemoteDataSource {
     int page = 1,
     int pageSize = 20,
     String? search,
-    String? priceListCode,
+    String? priceListCode, // Kept in signature for compatibility but not passed to API if not in spec
     List<String>? productTypes,
     List<int>? brandCodes,
   }) async {
     try {
-      final isSearch = search != null && search.isNotEmpty;
-      final endpoint = isSearch ? '/products/search' : '/products';
+      final isSearchOnly = search != null && search.isNotEmpty && (productTypes == null || productTypes.isEmpty) && (brandCodes == null || brandCodes.isEmpty);
+      
+      // If it's a specific search query without filters, use /products/search
+      // Otherwise use /products with filters
+      final endpoint = isSearchOnly ? '/products/search' : '/products';
 
       final queryParams = <String, dynamic>{
         'page': page,
         'pageSize': pageSize,
       };
 
-      if (isSearch) {
-        queryParams['q'] = search;
+      if (search != null && search.isNotEmpty) {
+        if (isSearchOnly) {
+          queryParams['q'] = search;
+        } else {
+          queryParams['search'] = search;
+        }
       }
 
-      if (priceListCode != null) {
-        queryParams['priceListCode'] = priceListCode;
-      }
+      // Note: priceListCode is omitted as it's not in the new OpenAPI spec
 
       if (productTypes != null && productTypes.isNotEmpty) {
         queryParams['productType'] = productTypes;

@@ -3,9 +3,11 @@ import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/product/product_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
+import 'package:chapur_ia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:chapur_ia/domain/entities/product.dart';
 import 'package:chapur_ia/domain/entities/customer.dart';
 import 'package:chapur_ia/domain/entities/cart_item.dart';
+import '../widgets/cart_icon_badge.dart';
 
 class ProductCatalogPage extends StatefulWidget {
   final Customer? customer;
@@ -30,6 +32,7 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
             reset: true,
             priceListCode: widget.customer?.priceListCode,
           ));
+      context.read<CartBloc>().add(LoadCartRequested());
     });
   }
 
@@ -164,6 +167,9 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
               ),
             ],
           ),
+          actions: const [
+            CartIconBadge(),
+          ],
         ),
         body: content,
       );
@@ -273,7 +279,10 @@ class _ProductListItemState extends State<_ProductListItem> {
   int _quantity = 0;
 
   void _increment() {
-    if (_quantity < widget.product.stockQuantity) {
+    final authState = context.read<AuthBloc>().state;
+    final bool isCustomer = authState is Authenticated && authState.user.isCustomer;
+
+    if (isCustomer || _quantity < widget.product.stockQuantity) {
       setState(() {
         _quantity++;
       });
@@ -347,7 +356,7 @@ class _ProductListItemState extends State<_ProductListItem> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          _buildStockBadge(widget.product.stockStatus, widget.product.stockQuantity),
+                          _buildStockBadge(context, widget.product.stockStatus, widget.product.stockQuantity),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -417,7 +426,7 @@ class _ProductListItemState extends State<_ProductListItem> {
                         CartItem(
                           articleCode: widget.product.articleCode,
                           quantity: _quantity,
-                          name: widget.product.name,
+                          description: widget.product.name,
                           unitPrice: widget.product.unitPrice,
                         ),
                       ),
@@ -479,21 +488,31 @@ class _ProductListItemState extends State<_ProductListItem> {
     );
   }
 
-  Widget _buildStockBadge(String status, int quantity) {
+  Widget _buildStockBadge(BuildContext context, String status, int quantity) {
+    final authState = context.read<AuthBloc>().state;
+    final bool isCustomer = authState is Authenticated && authState.user.isCustomer;
+
     Color color;
+    String label;
+
     switch (status) {
       case 'VERDE':
         color = Colors.green;
+        label = isCustomer ? 'Disponible' : 'Stock: $quantity';
         break;
       case 'AMARILLO':
         color = Colors.orange;
+        label = isCustomer ? 'Limitado' : 'Stock: $quantity';
         break;
       case 'ROJO':
         color = Colors.red;
+        label = isCustomer ? 'Sin Stock' : 'Stock: $quantity';
         break;
       default:
         color = Colors.grey;
+        label = 'Stock: $quantity';
     }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
@@ -506,7 +525,7 @@ class _ProductListItemState extends State<_ProductListItem> {
           Icon(Icons.inventory_2_outlined, size: 10, color: color),
           const SizedBox(width: 4),
           Text(
-            'Stock: $quantity',
+            label,
             style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
           ),
         ],

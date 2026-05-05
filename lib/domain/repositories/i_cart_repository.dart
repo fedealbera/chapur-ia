@@ -6,5 +6,7 @@ import 'package:chapur_ia/domain/entities/cart_item.dart';
 abstract class ICartRepository {
   Future<Either<Failure, Cart>> getCart();
   Future<Either<Failure, void>> addItem(CartItem item);
+  Future<Either<Failure, void>> removeItem(String articleCode);
+  Future<Either<Failure, void>> selectCustomer(String customerAccountNumber);
   Future<Either<Failure, void>> clearCart();
 }

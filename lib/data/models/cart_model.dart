@@ -5,16 +5,18 @@ class CartItemModel extends CartItem {
   const CartItemModel({
     required super.articleCode,
     required super.quantity,
-    super.name,
+    super.description,
     super.unitPrice,
+    super.subtotal,
   });
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
     return CartItemModel(
       articleCode: json['articleCode']?.toString() ?? '',
       quantity: (json['quantity'] as num?)?.toInt() ?? 0,
-      name: json['name']?.toString(),
-      unitPrice: (json['unitPrice'] as num?)?.toDouble(),
+      description: json['description']?.toString(),
+      unitPrice: (json['price'] as num?)?.toDouble(),
+      subtotal: (json['subtotal'] as num?)?.toDouble(),
     );
   }
 
@@ -29,7 +31,11 @@ class CartItemModel extends CartItem {
 class CartModel extends Cart {
   const CartModel({
     required super.items,
-    required super.totalAmount,
+    required super.subtotal,
+    required super.ivaTotal,
+    required super.grandTotal,
+    super.customerAccountNumber,
+    super.customerName,
   });
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
@@ -39,7 +45,11 @@ class CartModel extends Cart {
         [];
     return CartModel(
       items: itemsList,
-      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
+      subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
+      ivaTotal: (json['ivaTotal'] as num?)?.toDouble() ?? 0.0,
+      grandTotal: (json['grandTotal'] as num?)?.toDouble() ?? 0.0,
+      customerAccountNumber: json['customerAccountNumber']?.toString(),
+      customerName: json['customerName']?.toString(),
     );
   }
 }

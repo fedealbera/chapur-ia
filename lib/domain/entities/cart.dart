@@ -3,15 +3,33 @@ import 'cart_item.dart';
 
 class Cart extends Equatable {
   final List<CartItem> items;
-  final double totalAmount;
+  final double subtotal;
+  final double ivaTotal;
+  final double grandTotal;
+  final String? customerAccountNumber;
+  final String? customerName;
 
   const Cart({
     required this.items,
-    required this.totalAmount,
+    required this.subtotal,
+    required this.ivaTotal,
+    required this.grandTotal,
+    this.customerAccountNumber,
+    this.customerName,
   });
 
   @override
-  List<Object?> get props => [items, totalAmount];
+  List<Object?> get props => [
+        items,
+        subtotal,
+        ivaTotal,
+        grandTotal,
+        customerAccountNumber,
+        customerName,
+      ];
 
   int get totalItems => items.fold(0, (sum, item) => sum + item.quantity);
+  
+  // For backward compatibility or convenience
+  double get totalAmount => grandTotal;
 }

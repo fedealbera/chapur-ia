@@ -1,6 +1,8 @@
 import 'package:chapur_ia/presentation/pages/product_catalog_page.dart';
 import 'package:chapur_ia/presentation/pages/account_summary_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
 import 'package:chapur_ia/domain/entities/customer.dart';
 
 class CustomerDetailPage extends StatelessWidget {
@@ -143,6 +145,9 @@ class CustomerDetailPage extends StatelessWidget {
           Icons.add_shopping_cart,
           const Color(0xFF6366F1),
           () {
+            // Select customer in cart before navigating
+            context.read<CartBloc>().add(SelectCartCustomerRequested(customer.accountNumber));
+            
             Navigator.push(
               context,
               MaterialPageRoute(
