@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../blocs/cart/cart_bloc.dart';
+import 'checkout_form_page.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -161,8 +162,11 @@ class _CartPageState extends State<CartPage> {
                           height: 56,
                           child: ElevatedButton(
                             onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Finalización de pedido próximamente')),
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CheckoutFormPage(),
+                                ),
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -170,7 +174,14 @@ class _CartPageState extends State<CartPage> {
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             ),
-                            child: const Text('FINALIZAR PEDIDO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.shopping_bag_outlined, size: 20),
+                                SizedBox(width: 8),
+                                Text('FINALIZAR PEDIDO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
                           ),
                         ),
                       ],
