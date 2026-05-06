@@ -9,6 +9,7 @@ import 'customer_home_page.dart';
 import 'package:chapur_ia/domain/entities/user.dart';
 import '../widgets/cart_icon_badge.dart';
 import '../blocs/cart/cart_bloc.dart';
+import '../blocs/order/order_bloc.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -40,11 +41,30 @@ class _DashboardPageState extends State<DashboardPage> {
     final List<_NavItem> navItems = _getNavItems(user);
     final List<Widget> pages = _getPages(user);
 
+    final cartState = context.watch<CartBloc>().state;
+    String? selectedCustomer;
+    if (cartState is CartLoaded) {
+      selectedCustomer = cartState.cart.customerName;
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          navItems[_selectedIndex].title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              navItems[_selectedIndex].title,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            if ((user.isSalesperson || user.isAdmin) && 
+                _selectedIndex == 1 && 
+                selectedCustomer != null)
+              Text(
+                selectedCustomer,
+                style: const TextStyle(fontSize: 12, color: Color(0xFF6366F1), fontWeight: FontWeight.normal),
+              ),
+          ],
         ),
         actions: [
           const CartIconBadge(),
@@ -61,7 +81,18 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) => setState(() => _selectedIndex = index),
+        onTap: (index) {
+          setState(() => _selectedIndex = index);
+          // Refresh orders if moving to the Orders tab (index 2 for both roles)
+          if (index == 2) {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is Authenticated) {
+              context.read<OrderBloc>().add(FetchOrdersRequested(
+                    accountNumber: authState.user.isCustomer ? authState.user.customerAccountNumber : null,
+                  ));
+            }
+          }
+        },
         selectedItemColor: const Color(0xFF6366F1),
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,

@@ -66,6 +66,42 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
   Widget build(BuildContext context) {
     final content = Column(
       children: [
+        BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, authState) {
+            if (authState is Authenticated && (authState.user.isSalesperson || authState.user.isAdmin)) {
+              return BlocBuilder<CartBloc, CartState>(
+                builder: (context, cartState) {
+                  if (cartState is CartLoaded && cartState.cart.customerAccountNumber == null) {
+                    return Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.orange.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'Debe seleccionar un cliente antes de realizar un pedido.',
+                              style: TextStyle(color: Color(0xFFC05621), fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: TextField(

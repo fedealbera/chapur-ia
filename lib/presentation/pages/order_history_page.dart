@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/order/order_bloc.dart';
+import 'package:chapur_ia/presentation/blocs/auth/auth_bloc.dart';
 import 'package:chapur_ia/domain/entities/order.dart';
 import 'package:intl/intl.dart';
 import 'package:chapur_ia/presentation/pages/order_detail_page.dart';
@@ -16,20 +17,32 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
   @override
   void initState() {
     super.initState();
-    context.read<OrderBloc>().add(const FetchOrdersRequested());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = context.read<AuthBloc>().state;
+      if (authState is Authenticated) {
+        if (authState.user.isCustomer) {
+          context.read<OrderBloc>().add(FetchOrdersRequested(
+            accountNumber: authState.user.customerAccountNumber,
+          ));
+        } else {
+          // Salesperson/Admin: Fetch all orders
+          context.read<OrderBloc>().add(const FetchOrdersRequested());
+        }
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<OrderBloc, OrderState>(
       builder: (context, state) {
-        if (state is OrderLoading) {
+        if (state is OrderLoading || state is OrderInitial) {
           return const Center(child: CircularProgressIndicator());
         } else if (state is OrderFailure) {
           return Center(child: Text('Error: ${state.message}'));
         } else if (state is OrderListLoaded) {
           if (state.orders.isEmpty) {
-            return const Center(child: Text('No tienes pedidos registrados.'));
+            return const Center(child: Text('No se encontraron pedidos.'));
           }
           return ListView.separated(
             padding: const EdgeInsets.all(16),

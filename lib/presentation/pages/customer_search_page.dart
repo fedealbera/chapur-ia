@@ -1,3 +1,5 @@
+import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
+import 'package:chapur_ia/presentation/pages/product_catalog_page.dart';
 import 'package:chapur_ia/presentation/pages/customer_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -127,7 +129,29 @@ class _CustomerListItem extends StatelessWidget {
       ),
       title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Text('Cuenta: ${customer.accountNumber} | CUIT: ${customer.cuit}'),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.add_shopping_cart, color: Color(0xFF6366F1)),
+            onPressed: () {
+              // Select customer in cart and navigate to catalog
+              context.read<CartBloc>().add(SelectCartCustomerRequested(customer.accountNumber));
+              
+              // We can either navigate to detail or directly to catalog. 
+              // The user wants to "hacer el pedido", so catalog seems better.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductCatalogPage(customer: customer),
+                ),
+              );
+            },
+            tooltip: 'Nuevo Pedido',
+          ),
+          const Icon(Icons.chevron_right, color: Colors.grey),
+        ],
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: Color(0xFFEEEEEE)), // Colors.grey.shade200
