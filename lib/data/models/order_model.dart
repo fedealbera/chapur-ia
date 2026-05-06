@@ -11,11 +11,11 @@ class OrderItemModel extends OrderItem {
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      articleCode: json['articleCode']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
-      quantity: json['quantity'] ?? 0,
-      unitPrice: (json['unitPrice'] as num).toDouble(),
-      subtotal: (json['subtotal'] as num).toDouble(),
+      articleCode: json['articleCode']?.toString() ?? json['productCode']?.toString() ?? '',
+      description: json['description']?.toString() ?? json['productName']?.toString() ?? json['name']?.toString() ?? '',
+      quantity: json['quantity'] ?? json['qty'] ?? 0,
+      unitPrice: ((json['unitPrice'] ?? json['price'] ?? 0) as num).toDouble(),
+      subtotal: ((json['subtotal'] ?? json['amount'] ?? json['total'] ?? 0) as num).toDouble(),
     );
   }
 
@@ -44,16 +44,17 @@ class OrderModel extends Order {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
+    final itemsList = json['items'] ?? json['lines'] ?? json['details'] ?? json['orderItems'];
     return OrderModel(
       id: json['id']?.toString() ?? '',
       orderNumber: json['orderNumber']?.toString() ?? '',
       legacyOrderId: json['legacyOrderId']?.toString() ?? '',
-      customerAccountNumber: json['customerAccountNumber']?.toString() ?? '',
-      customerName: json['customerName']?.toString() ?? '',
-      date: DateTime.parse(json['date']),
+      customerAccountNumber: json['customerAccountNumber']?.toString() ?? json['accountNumber']?.toString() ?? '',
+      customerName: json['customerName']?.toString() ?? json['clientName']?.toString() ?? json['customer']?['name']?.toString() ?? '',
+      date: json['date'] != null ? DateTime.parse(json['date']) : DateTime.now(),
       status: json['status']?.toString() ?? '',
-      total: (json['total'] as num).toDouble(),
-      items: (json['items'] as List<dynamic>?)
+      total: ((json['total'] ?? json['totalAmount'] ?? 0) as num).toDouble(),
+      items: (itemsList as List<dynamic>?)
               ?.map((item) => OrderItemModel.fromJson(item))
               .toList() ??
           [],

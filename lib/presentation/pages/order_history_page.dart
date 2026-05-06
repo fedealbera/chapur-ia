@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/order/order_bloc.dart';
 import 'package:chapur_ia/domain/entities/order.dart';
 import 'package:intl/intl.dart';
-import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
-import 'package:chapur_ia/presentation/pages/cart_page.dart';
+import 'package:chapur_ia/presentation/pages/order_detail_page.dart';
 
 class OrderHistoryPage extends StatefulWidget {
   const OrderHistoryPage({super.key});
@@ -93,14 +92,10 @@ class _OrderListItem extends StatelessWidget {
         ),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: () {
-          final cartBloc = context.read<CartBloc>();
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => BlocProvider.value(
-                value: cartBloc,
-                child: const CartPage(),
-              ),
+              builder: (_) => OrderDetailPage(order: order),
             ),
           );
         },

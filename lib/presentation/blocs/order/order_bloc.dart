@@ -17,6 +17,13 @@ class FetchOrdersRequested extends OrderEvent {
   List<Object?> get props => [accountNumber];
 }
 
+class FetchOrderDetailRequested extends OrderEvent {
+  final String orderId;
+  const FetchOrderDetailRequested(this.orderId);
+  @override
+  List<Object?> get props => [orderId];
+}
+
 /* 
   Since the API manages the cart on the server side (/api/cart),
   the Bloc will trigger API calls for cart modifications.
@@ -72,6 +79,13 @@ class OrderListLoaded extends OrderState {
   List<Object?> get props => [orders];
 }
 
+class OrderDetailLoaded extends OrderState {
+  final Order order;
+  const OrderDetailLoaded(this.order);
+  @override
+  List<Object?> get props => [order];
+}
+
 class OrderSuccess extends OrderState {
   final String orderId;
   const OrderSuccess(this.orderId);
@@ -98,6 +112,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     required this.createOrderUseCase,
   }) : super(OrderInitial()) {
     on<FetchOrdersRequested>(_onFetchOrders);
+    on<FetchOrderDetailRequested>(_onFetchOrderDetail);
     on<SubmitOrderRequested>(_onSubmitOrder);
     // AddToCart logic would typically go into a CartDataSource/Repository
     // For now, focusing on Order flow as per the task list.
@@ -112,6 +127,18 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     result.fold(
       (failure) => emit(OrderFailure(failure.message)),
       (orders) => emit(OrderListLoaded(orders)),
+    );
+  }
+
+  Future<void> _onFetchOrderDetail(
+    FetchOrderDetailRequested event,
+    Emitter<OrderState> emit,
+  ) async {
+    emit(OrderLoading());
+    final result = await getOrderDetailUseCase.execute(event.orderId);
+    result.fold(
+      (failure) => emit(OrderFailure(failure.message)),
+      (order) => emit(OrderDetailLoaded(order)),
     );
   }
 
