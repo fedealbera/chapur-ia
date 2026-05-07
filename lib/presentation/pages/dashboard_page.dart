@@ -41,63 +41,131 @@ class _DashboardPageState extends State<DashboardPage> {
     final List<_NavItem> navItems = _getNavItems(user);
     final List<Widget> pages = _getPages(user);
 
-    final cartState = context.watch<CartBloc>().state;
-    String? selectedCustomer;
-    if (cartState is CartLoaded) {
-      selectedCustomer = cartState.cart.customerName;
-    }
-
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              navItems[_selectedIndex].title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            if ((user.isSalesperson || user.isAdmin) && 
-                _selectedIndex == 1 && 
-                selectedCustomer != null)
-              Text(
-                selectedCustomer,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF6366F1), fontWeight: FontWeight.normal),
-              ),
-          ],
-        ),
-        actions: [
-          const CartIconBadge(),
-          IconButton(
-            icon: const Icon(Icons.logout_outlined),
-            onPressed: () => context.read<AuthBloc>().add(LogoutRequested()),
+        backgroundColor: const Color(0xFF474747),
+        elevation: 0,
+        centerTitle: false,
+        title: Text(
+          navItems[_selectedIndex].title,
+          style: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 20,
           ),
+        ),
+        actions: const [
+          CartIconBadge(),
         ],
       ),
-      drawer: _buildDrawer(user, navItems),
       body: IndexedStack(
         index: _selectedIndex,
         children: pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() => _selectedIndex = index);
-          // Refresh orders if moving to the Orders tab (index 2 for both roles)
-          if (index == 2) {
-            final authState = context.read<AuthBloc>().state;
-            if (authState is Authenticated) {
-              context.read<OrderBloc>().add(FetchOrdersRequested(
-                    accountNumber: authState.user.isCustomer ? authState.user.customerAccountNumber : null,
-                  ));
-            }
-          }
-        },
-        selectedItemColor: const Color(0xFF6366F1),
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        items: navItems.map((item) => item.bottomNavItem).toList(),
+      bottomNavigationBar: Container(
+        height: 80,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: navItems.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final isSelected = _selectedIndex == index;
+
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  setState(() => _selectedIndex = index);
+                  if (item.title == 'Pedidos' || item.title == 'Mis Pedidos') {
+                    final authState = context.read<AuthBloc>().state;
+                    if (authState is Authenticated) {
+                      context.read<OrderBloc>().add(FetchOrdersRequested(
+                            accountNumber: authState.user.isCustomer ? authState.user.customerAccountNumber : null,
+                          ));
+                    }
+                  } else if (item.title == 'Salir') {
+                    context.read<AuthBloc>().add(LogoutRequested());
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0x26C92828) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildNavIcon(item.title, isSelected),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.title,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 12,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: const Color(0xFF474747),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavIcon(String title, bool isSelected) {
+    String assetPath;
+    IconData fallbackIcon;
+
+    switch (title) {
+      case 'Clientes':
+      case 'Inicio':
+        assetPath = 'assets/images/users.png';
+        fallbackIcon = Icons.people_outline;
+        break;
+      case 'Catálogos':
+      case 'Catálogo':
+        assetPath = 'assets/images/box.png';
+        fallbackIcon = Icons.shopping_bag_outlined;
+        break;
+      case 'Pedidos':
+      case 'Mis Pedidos':
+        assetPath = 'assets/images/clipboard_notes.png';
+        fallbackIcon = Icons.history_outlined;
+        break;
+      case 'Salir':
+      case 'Cuenta':
+        assetPath = 'assets/images/exit.png';
+        fallbackIcon = Icons.logout_outlined;
+        break;
+      default:
+        return const Icon(Icons.help_outline);
+    }
+
+    return Image.asset(
+      assetPath,
+      width: 24,
+      height: 24,
+      errorBuilder: (context, error, stackTrace) => Icon(
+        fallbackIcon,
+        color: const Color(0xFF474747),
+        size: 24,
       ),
     );
   }
@@ -108,26 +176,18 @@ class _DashboardPageState extends State<DashboardPage> {
         const _NavItem(
           title: 'Clientes',
           icon: Icons.people_outline,
-          bottomNavItem: BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline),
-            label: 'Clientes',
-          ),
         ),
         const _NavItem(
           title: 'Catálogos',
           icon: Icons.shopping_bag_outlined,
-          bottomNavItem: BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined),
-            label: 'Catálogos',
-          ),
         ),
         const _NavItem(
           title: 'Pedidos',
           icon: Icons.history_outlined,
-          bottomNavItem: BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            label: 'Pedidos',
-          ),
+        ),
+        const _NavItem(
+          title: 'Salir',
+          icon: Icons.logout_outlined,
         ),
       ];
     } else {
@@ -136,34 +196,18 @@ class _DashboardPageState extends State<DashboardPage> {
         const _NavItem(
           title: 'Inicio',
           icon: Icons.home_outlined,
-          bottomNavItem: BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Inicio',
-          ),
         ),
         const _NavItem(
           title: 'Catálogo',
           icon: Icons.shopping_bag_outlined,
-          bottomNavItem: BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined),
-            label: 'Catálogo',
-          ),
         ),
         const _NavItem(
           title: 'Mis Pedidos',
           icon: Icons.history_outlined,
-          bottomNavItem: BottomNavigationBarItem(
-            icon: Icon(Icons.history_outlined),
-            label: 'Mis Pedidos',
-          ),
         ),
         const _NavItem(
           title: 'Cuenta',
           icon: Icons.account_balance_wallet_outlined,
-          bottomNavItem: BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            label: 'Cuenta',
-          ),
         ),
       ];
     }
@@ -187,73 +231,14 @@ class _DashboardPageState extends State<DashboardPage> {
       ];
     }
   }
-
-  Widget _buildDrawer(User user, List<_NavItem> navItems) {
-    return Drawer(
-      child: Column(
-        children: [
-          UserAccountsDrawerHeader(
-            decoration: const BoxDecoration(color: Color(0xFF1A1F2C)),
-            accountName: Text(user.name),
-            accountEmail: Text(user.email),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: const Color(0xFF6366F1),
-              child: Text(
-                user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                style: const TextStyle(fontSize: 24, color: Colors.white),
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                ...navItems.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final item = entry.value;
-                  return ListTile(
-                    leading: Icon(item.icon),
-                    title: Text(item.title),
-                    selected: _selectedIndex == index,
-                    onTap: () {
-                      setState(() => _selectedIndex = index);
-                      Navigator.pop(context);
-                    },
-                  );
-                }),
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.logout_outlined, color: Colors.redAccent),
-                  title: const Text('Salir', style: TextStyle(color: Colors.redAccent)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    context.read<AuthBloc>().add(LogoutRequested());
-                  },
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'Versión 1.0.0',
-              style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _NavItem {
   final String title;
   final IconData icon;
-  final BottomNavigationBarItem bottomNavItem;
 
   const _NavItem({
     required this.title,
     required this.icon,
-    required this.bottomNavItem,
   });
 }

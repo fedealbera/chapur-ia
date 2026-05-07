@@ -1,5 +1,3 @@
-import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
-import 'package:chapur_ia/presentation/pages/product_catalog_page.dart';
 import 'package:chapur_ia/presentation/pages/customer_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,44 +32,39 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
       children: [
         Container(
           width: double.infinity,
-          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          padding: const EdgeInsets.all(12),
-          decoration: const BoxDecoration(
-            color: Color(0x1A6366F1),
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-            border: Border.fromBorderSide(BorderSide(color: Color(0x336366F1))),
-          ),
-          child: const Row(
+          color: const Color(0xFF474747),
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.info_outline, color: Color(0xFF6366F1), size: 20),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Ingrese al menos 2 caracteres para buscar clientes por nombre, CUIT o número de cuenta.',
-                  style: TextStyle(
-                    color: Color(0xFF4338CA),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+              TextField(
+                controller: _searchController,
+                style: const TextStyle(fontFamily: 'Inter', fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Buscar producto', // Matching the text in the provided image
+                  hintStyle: TextStyle(color: Colors.grey.shade600, fontFamily: 'Inter'),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Image.asset(
+                      'assets/images/search.png',
+                      width: 20,
+                      height: 20,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.search, color: Colors.grey),
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
                   ),
                 ),
+                onChanged: (value) {
+                  context.read<CustomerBloc>().add(SearchCustomersRequested(term: value, reset: true));
+                },
               ),
             ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Buscar por CUIT, nombre o cuenta...',
-              prefixIcon: const Icon(Icons.person_search_outlined),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              filled: true,
-              fillColor: const Color(0xFFFAFAFA), // Colors.grey.shade50
-            ),
-            onChanged: (value) {
-              context.read<CustomerBloc>().add(SearchCustomersRequested(term: value, reset: true));
-            },
           ),
         ),
         Expanded(
@@ -102,8 +95,13 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                     Icon(Icons.search, size: 64, color: Color(0xFFE0E0E0)),
                     SizedBox(height: 16),
                     Text(
-                      'Comience a escribir para buscar un cliente',
-                      style: TextStyle(color: Color(0xFF757575), fontSize: 16),
+                      'Comience a escribir para buscar un cliente, debe ingresar al menos 2 caracteres para la búsqueda.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        color: Color(0xFF757575),
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -122,48 +120,52 @@ class _CustomerListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: const CircleAvatar(
-        backgroundColor: Color(0x1A6366F1),
-        child: Icon(Icons.business, color: Color(0xFF6366F1)),
-      ),
-      title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text('Cuenta: ${customer.accountNumber} | CUIT: ${customer.cuit}'),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.add_shopping_cart, color: Color(0xFF6366F1)),
-            onPressed: () {
-              // Select customer in cart and navigate to catalog
-              context.read<CartBloc>().add(SelectCartCustomerRequested(customer.accountNumber));
-              
-              // We can either navigate to detail or directly to catalog. 
-              // The user wants to "hacer el pedido", so catalog seems better.
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ProductCatalogPage(customer: customer),
-                ),
-              );
-            },
-            tooltip: 'Nuevo Pedido',
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          const Icon(Icons.chevron_right, color: Colors.grey),
         ],
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFEEEEEE)), // Colors.grey.shade200
-      ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => CustomerDetailPage(customer: customer),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        title: Text(
+          customer.name,
+          style: const TextStyle(
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: Color(0xFF474747),
           ),
-        );
-      },
+        ),
+        subtitle: Text(
+          customer.accountNumber, // Assuming account number is the CLI-001 part
+          style: TextStyle(
+            fontFamily: 'Inter',
+            color: Colors.grey.shade600,
+            fontSize: 14,
+          ),
+        ),
+        trailing: Image.asset(
+          'assets/images/arrow_right.png',
+          width: 24,
+          height: 24,
+          errorBuilder: (context, error, stackTrace) => const Icon(Icons.arrow_forward, color: Colors.black),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CustomerDetailPage(customer: customer),
+            ),
+          );
+        },
+      ),
     );
   }
 }
