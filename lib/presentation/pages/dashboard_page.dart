@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../widgets/custom_bottom_nav.dart';
 import '../blocs/auth/auth_bloc.dart';
 import 'product_catalog_page.dart';
 import 'customer_search_page.dart';
@@ -64,111 +65,29 @@ class _DashboardPageState extends State<DashboardPage> {
         index: _selectedIndex,
         children: pages,
       ),
-      bottomNavigationBar: Container(
-        height: 80,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: navItems.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            final isSelected = _selectedIndex == index;
-
-            return Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() => _selectedIndex = index);
-                  if (item.title == 'Pedidos' || item.title == 'Mis Pedidos') {
-                    final authState = context.read<AuthBloc>().state;
-                    if (authState is Authenticated) {
-                      context.read<OrderBloc>().add(FetchOrdersRequested(
-                            accountNumber: authState.user.isCustomer ? authState.user.customerAccountNumber : null,
-                          ));
-                    }
-                  } else if (item.title == 'Salir') {
-                    context.read<AuthBloc>().add(LogoutRequested());
-                  }
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0x26C92828) : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildNavIcon(item.title, isSelected),
-                      const SizedBox(height: 4),
-                      Text(
-                        item.title,
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          color: const Color(0xFF474747),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
+      bottomNavigationBar: CustomBottomNav(
+        selectedIndex: _selectedIndex,
+        onItemSelected: (index) {
+          if (index == 3) { // Salir
+            context.read<AuthBloc>().add(LogoutRequested());
+            return;
+          }
+          setState(() => _selectedIndex = index);
+          
+          final itemTitle = navItems[index].title;
+          if (itemTitle == 'Pedidos' || itemTitle == 'Mis Pedidos') {
+            final authState = context.read<AuthBloc>().state;
+            if (authState is Authenticated) {
+              context.read<OrderBloc>().add(FetchOrdersRequested(
+                    accountNumber: authState.user.isCustomer ? authState.user.customerAccountNumber : null,
+                  ));
+            }
+          }
+        },
       ),
     );
   }
 
-  Widget _buildNavIcon(String title, bool isSelected) {
-    String assetPath;
-    IconData fallbackIcon;
-
-    switch (title) {
-      case 'Clientes':
-      case 'Inicio':
-        assetPath = 'assets/images/users.png';
-        fallbackIcon = Icons.people_outline;
-        break;
-      case 'Catálogos':
-      case 'Catálogo':
-        assetPath = 'assets/images/box.png';
-        fallbackIcon = Icons.shopping_bag_outlined;
-        break;
-      case 'Pedidos':
-      case 'Mis Pedidos':
-        assetPath = 'assets/images/clipboard_notes.png';
-        fallbackIcon = Icons.history_outlined;
-        break;
-      case 'Salir':
-      case 'Cuenta':
-        assetPath = 'assets/images/exit.png';
-        fallbackIcon = Icons.logout_outlined;
-        break;
-      default:
-        return const Icon(Icons.help_outline);
-    }
-
-    return Image.asset(
-      assetPath,
-      width: 24,
-      height: 24,
-      errorBuilder: (context, error, stackTrace) => Icon(
-        fallbackIcon,
-        color: const Color(0xFF474747),
-        size: 24,
-      ),
-    );
-  }
 
   List<_NavItem> _getNavItems(User user) {
     if (user.isSalesperson || user.isAdmin) {

@@ -9,6 +9,7 @@ import '../blocs/account/account_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
 import 'document_detail_page.dart';
 import '../../injection_container.dart';
+import '../widgets/custom_bottom_nav.dart';
 
 class AccountSummaryPage extends StatefulWidget {
   final Customer? customer;
@@ -99,7 +100,7 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Estado de Cuenta'),
-        backgroundColor: const Color(0xFF1A1F2C),
+        backgroundColor: const Color(0xFF474747),
         foregroundColor: Colors.white,
       ),
       body: BlocListener<AccountBloc, AccountState>(
@@ -148,6 +149,18 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: CustomBottomNav(
+        selectedIndex: 0, // Clientes selected
+        onItemSelected: (index) {
+          if (index == 0) return; // Already here
+          if (index == 3) {
+            context.read<AuthBloc>().add(LogoutRequested());
+            Navigator.popUntil(context, (route) => route.isFirst);
+            return;
+          }
+          Navigator.pop(context, index); 
+        },
       ),
     );
   }

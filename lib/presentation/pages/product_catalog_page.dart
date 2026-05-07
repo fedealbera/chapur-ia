@@ -8,6 +8,7 @@ import 'package:chapur_ia/domain/entities/product.dart';
 import 'package:chapur_ia/domain/entities/customer.dart';
 import 'package:chapur_ia/domain/entities/cart_item.dart';
 import '../widgets/cart_icon_badge.dart';
+import '../widgets/custom_bottom_nav.dart';
 
 class ProductCatalogPage extends StatefulWidget {
   final Customer? customer;
@@ -102,29 +103,32 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
             return const SizedBox.shrink();
           },
         ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
+        Container(
+          width: double.infinity,
+          color: const Color(0xFF474747),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
           child: TextField(
             controller: _searchController,
+            style: const TextStyle(fontFamily: 'Inter', fontSize: 14),
             decoration: InputDecoration(
-              hintText: 'Buscar productos...',
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  _searchController.clear();
-                  context.read<ProductBloc>().add(FetchProductsRequested(
-                        reset: true,
-                        priceListCode: widget.customer?.priceListCode,
-                      ));
-                },
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+              hintText: 'Buscar producto',
+              hintStyle: TextStyle(color: Colors.grey.shade600, fontFamily: 'Inter'),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Image.asset(
+                  'assets/images/search.png',
+                  width: 20,
+                  height: 20,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.search, color: Colors.grey),
+                ),
               ),
               filled: true,
-              fillColor: Colors.grey.shade50,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
             ),
             onSubmitted: (value) {
               final state = context.read<ProductBloc>().state;
@@ -193,13 +197,27 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
     if (widget.customer != null) {
       return Scaffold(
         appBar: AppBar(
+          backgroundColor: const Color(0xFF474747),
+          iconTheme: const IconThemeData(color: Colors.white),
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Catálogo de Productos', style: TextStyle(fontSize: 16)),
+              const Text(
+                'Catálogo de Productos',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
               Text(
                 widget.customer!.name,
-                style: const TextStyle(fontSize: 12, color: Colors.white70),
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 12,
+                  color: Colors.white70,
+                ),
               ),
             ],
           ),
@@ -208,6 +226,18 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
           ],
         ),
         body: content,
+        bottomNavigationBar: CustomBottomNav(
+          selectedIndex: 1, // Catálogos selected
+          onItemSelected: (index) {
+            if (index == 1) return;
+            if (index == 3) {
+              context.read<AuthBloc>().add(LogoutRequested());
+              Navigator.popUntil(context, (route) => route.isFirst);
+              return;
+            }
+            Navigator.pop(context, index);
+          },
+        ),
       );
     }
 
@@ -342,14 +372,14 @@ class _ProductListItemState extends State<_ProductListItem> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryRed = Color(0xFFCE1126);
-    const lightGrey = Color(0xFFF2F2F2);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -360,212 +390,197 @@ class _ProductListItemState extends State<_ProductListItem> {
       ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white,
-                  ),
-                  child: widget.product.imageUrl.isNotEmpty
-                      ? Image.network(widget.product.imageUrl, fit: BoxFit.contain)
-                      : const Icon(Icons.image_not_supported, color: Colors.grey, size: 40),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            widget.product.articleCode,
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          _buildStockBadge(context, widget.product.stockStatus, widget.product.stockQuantity),
-                        ],
+                child: widget.product.imageUrl.isNotEmpty
+                    ? Image.network(widget.product.imageUrl, fit: BoxFit.contain)
+                    : const Icon(Icons.image_not_supported, color: Colors.grey, size: 40),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.product.articleCode,
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        color: Color(0xFF474747),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const SizedBox(height: 4),
+                    ),
+                    if (widget.product.description.isNotEmpty)
+                      Text(
+                        widget.product.description,
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          color: Color(0xFF565656),
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          height: 1.1,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    if (widget.product.name.isNotEmpty && widget.product.name != widget.product.description)
                       Text(
                         widget.product.name,
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.product.description,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w500,
                           fontSize: 13,
-                          height: 1.2,
+                          color: Color(0xFF565656),
                         ),
-                        maxLines: 2,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        NumberFormat.currency(symbol: 'USD ', decimalDigits: 2).format(widget.product.unitPrice),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 22,
-                          color: primaryRed,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1, color: lightGrey, thickness: 1.5),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    _buildCircularBtn(Icons.remove, lightGrey, Colors.black, _decrement),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Text(
-                        '$_quantity',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                    const SizedBox(height: 2),
+                    Text(
+                      NumberFormat.currency(symbol: 'USD ', decimalDigits: 2).format(widget.product.unitPrice),
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w900,
+                        fontSize: 19,
+                        color: Color(0xFFDE535C),
                       ),
                     ),
-                    _buildCircularBtn(Icons.add, lightGrey, Colors.black, _increment),
+                    const SizedBox(height: 4),
+                    _buildStockText(context, widget.product.stockStatus, widget.product.stockQuantity),
                   ],
                 ),
-                ElevatedButton(
-                  onPressed: _quantity > 0 ? () {
-                    context.read<CartBloc>().add(
-                      AddToCartRequested(
-                        CartItem(
-                          articleCode: widget.product.articleCode,
-                          quantity: _quantity,
-                          description: widget.product.name,
-                          unitPrice: widget.product.unitPrice,
-                        ),
+              ),
+            ],
+          ),
+          const Divider(height: 32, color: Color(0xFFF2F2F2)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  _buildIconBtn('assets/images/less.png', _decrement),
+                  Container(
+                    width: 40,
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$_quantity',
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                    );
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Agregado: $_quantity x ${widget.product.name}'),
-                        backgroundColor: primaryRed,
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 1),
-                      ),
-                    );
-                    
-                    setState(() {
-                      _quantity = 0; // Reset after adding
-                    });
-                  } : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryRed,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    elevation: 0,
+                    ),
                   ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.add, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Agregar',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  _buildIconBtn('assets/images/more.png', _increment),
+                ],
+              ),
+              ElevatedButton(
+                onPressed: _quantity > 0 ? () {
+                  context.read<CartBloc>().add(
+                    AddToCartRequested(
+                      CartItem(
+                        articleCode: widget.product.articleCode,
+                        quantity: _quantity,
+                        description: widget.product.name,
+                        unitPrice: widget.product.unitPrice,
                       ),
-                    ],
-                  ),
+                    ),
+                  );
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Agregado: $_quantity x ${widget.product.name}'),
+                      backgroundColor: const Color(0xFFD61D26),
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
+                  
+                  setState(() {
+                    _quantity = 0; 
+                  });
+                } : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFD61D26),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey.shade300,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  elevation: 0,
                 ),
-              ],
-            ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.add, size: 18),
+                    SizedBox(width: 4),
+                    Text(
+                      'Agregar',
+                      style: TextStyle(fontFamily: 'Inter', fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCircularBtn(IconData icon, Color bgColor, Color iconColor, VoidCallback onTap) {
-    return InkWell(
+  Widget _buildIconBtn(String assetPath, VoidCallback onTap) {
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(25),
       child: Container(
-        width: 50,
-        height: 50,
+        width: 36,
+        height: 36,
         decoration: BoxDecoration(
-          color: bgColor,
-          shape: BoxShape.circle,
+          color: const Color(0xFFF2F2F2),
+          borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(icon, color: iconColor, size: 24),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset(
+            assetPath,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.help_outline, size: 16),
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildStockBadge(BuildContext context, String status, int quantity) {
-    final authState = context.read<AuthBloc>().state;
-    final bool isCustomer = authState is Authenticated && authState.user.isCustomer;
-
+  Widget _buildStockText(BuildContext context, String status, int quantity) {
     Color color;
-    String label;
-
     switch (status) {
       case 'VERDE':
         color = Colors.green;
-        label = isCustomer ? 'Disponible' : 'Stock: $quantity';
         break;
       case 'AMARILLO':
         color = Colors.orange;
-        label = isCustomer ? 'Limitado' : 'Stock: $quantity';
         break;
       case 'ROJO':
         color = Colors.red;
-        label = isCustomer ? 'Sin Stock' : 'Stock: $quantity';
         break;
       default:
         color = Colors.grey;
-        label = 'Stock: $quantity';
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.inventory_2_outlined, size: 10, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
-          ),
-        ],
+    return Text(
+      'Stock: $quantity unidades',
+      style: TextStyle(
+        fontFamily: 'Inter',
+        color: color,
+        fontSize: 13,
+        fontWeight: FontWeight.w500,
       ),
     );
   }
+
 }

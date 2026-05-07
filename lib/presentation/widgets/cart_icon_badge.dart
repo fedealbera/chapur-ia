@@ -17,53 +17,50 @@ class CartIconBadge extends StatelessWidget {
           count = state.cart.totalItems;
         }
 
-        return Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              icon: Icon(Icons.shopping_cart_outlined, color: color),
-              onPressed: () {
-                final cartBloc = context.read<CartBloc>();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => BlocProvider.value(
-                      value: cartBloc,
-                      child: const CartPage(),
-                    ),
-                  ),
-                );
-              },
-            ),
-            if (count > 0)
-              Positioned(
-                right: 6,
-                top: 6,
-                child: IgnorePointer(
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '$count',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
+        return GestureDetector(
+          onTap: () {
+            final cartBloc = context.read<CartBloc>();
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BlocProvider.value(
+                  value: cartBloc,
+                  child: const CartPage(),
                 ),
               ),
-          ],
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.only(right: 16, top: 12, bottom: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD61D26),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset(
+                  'assets/images/shopping_cart_white.png',
+                  width: 20,
+                  height: 20,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.shopping_cart, color: Colors.white, size: 20),
+                ),
+                if (count > 0) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    '$count',
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         );
       },
     );
