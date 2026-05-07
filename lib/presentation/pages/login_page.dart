@@ -15,6 +15,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   
   bool _isCustomer = false;
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -71,13 +72,13 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 24),
                   const Text(
-                    'Fuerza de Venta',
+                    'Fuerza de Ventas',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold, // o FontWeight.w600 dependiendo del peso deseado
-                      color: Color(0xFF474747),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF121212),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -86,96 +87,133 @@ class _LoginPageState extends State<LoginPage> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Inter',
-                      fontSize: 16,
-                      color: Colors.grey,
+                      fontSize: 14,
+                      color: Color(0xFF474747),
                     ),
                   ),
                   const SizedBox(height: 32),
                   
-                  // Segmented Control (Visual only, to match Figma)
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(8),
+                  const Text(
+                    'Tipo de Usuario',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF121212),
                     ),
-                    padding: const EdgeInsets.all(4),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _isCustomer = false),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: !_isCustomer ? Colors.white : Colors.transparent,
-                                borderRadius: BorderRadius.circular(6),
-                                boxShadow: !_isCustomer
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.05),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        )
-                                      ]
-                                    : null,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _isCustomer = false),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: !_isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade300,
+                                width: 2,
                               ),
-                              child: Text(
-                                'Vendedor',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.business_center_outlined,
                                   color: !_isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade600,
+                                  size: 28,
                                 ),
-                              ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Vendedor',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    color: !_isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () => setState(() => _isCustomer = true),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              decoration: BoxDecoration(
-                                color: _isCustomer ? Colors.white : Colors.transparent,
-                                borderRadius: BorderRadius.circular(6),
-                                boxShadow: _isCustomer
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.05),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
-                                        )
-                                      ]
-                                    : null,
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _isCustomer = true),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: _isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade300,
+                                width: 2,
                               ),
-                              child: Text(
-                                'Cliente',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.person_outline,
                                   color: _isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade600,
+                                  size: 28,
                                 ),
-                              ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Cliente',
+                                  style: TextStyle(
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.bold,
+                                    color: _isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   
                   const SizedBox(height: 32),
+                  const Text(
+                    'Email / Usuario',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF121212),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   _buildTextField(
                     controller: _emailController,
-                    label: 'Correo electrónico',
-                    icon: Icons.email_outlined,
+                    hintText: 'usuario@empresa.com',
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Contraseña',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF121212),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   _buildTextField(
                     controller: _passwordController,
-                    label: 'Contraseña',
-                    icon: Icons.lock_outline,
-                    obscureText: true,
+                    hintText: 'Ingrese su contraseña',
+                    obscureText: _obscurePassword,
+                    isPassword: true,
+                    onToggleVisibility: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
                   ),
                   const SizedBox(height: 32),
                   BlocBuilder<AuthBloc, AuthState>(
@@ -216,7 +254,8 @@ class _LoginPageState extends State<LoginPage> {
                     'CHAPUR S.A. - TMC',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.grey,
+                      fontFamily: 'Inter',
+                      color: Color(0xFF474747),
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.5,
@@ -233,33 +272,60 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildTextField({
     required TextEditingController controller,
-    required String label,
-    required IconData icon,
+    required String hintText,
     bool obscureText = false,
+    bool isPassword = false,
+    VoidCallback? onToggleVisibility,
     TextInputType? keyboardType,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
       keyboardType: keyboardType,
-      style: const TextStyle(color: Colors.black87),
+      style: const TextStyle(
+        fontFamily: 'Inter',
+        color: Colors.black87,
+      ),
       decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TextStyle(color: Colors.grey.shade600),
-        prefixIcon: Icon(icon, color: Colors.grey.shade500),
+        hintText: hintText,
+        hintStyle: TextStyle(
+          fontFamily: 'Inter',
+          color: Colors.grey.shade400,
+          fontSize: 14,
+        ),
+        suffixIcon: isPassword
+            ? IconButton(
+                icon: Image.asset(
+                  'assets/images/eyes.png',
+                  width: 24,
+                  height: 24,
+                  color: Colors.grey.shade600,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    obscureText ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                onPressed: onToggleVisibility,
+              )
+            : null,
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Color(0xFFD32F2F), width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
         ),
       ),
       validator: (value) {
