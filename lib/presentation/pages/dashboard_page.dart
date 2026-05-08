@@ -13,18 +13,20 @@ import '../blocs/cart/cart_bloc.dart';
 import '../blocs/order/order_bloc.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final int initialIndex;
+  const DashboardPage({super.key, this.initialIndex = 0});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
     // Load cart on dashboard start
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CartBloc>().add(LoadCartRequested());

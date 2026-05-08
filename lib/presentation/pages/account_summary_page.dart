@@ -8,6 +8,7 @@ import '../../domain/entities/account_movement.dart';
 import '../blocs/account/account_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
 import 'document_detail_page.dart';
+import 'dashboard_page.dart';
 import '../../injection_container.dart';
 import '../widgets/custom_bottom_nav.dart';
 
@@ -152,13 +153,17 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
       bottomNavigationBar: CustomBottomNav(
         selectedIndex: 0,
         onItemSelected: (index) {
-          if (index == 0) return;
-          if (index == 3) {
+          if (index == 3) { // Salir
             context.read<AuthBloc>().add(LogoutRequested());
             Navigator.popUntil(context, (route) => route.isFirst);
             return;
           }
-          Navigator.pop(context, index); 
+          
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => DashboardPage(initialIndex: index)),
+            (route) => false,
+          );
         },
       ),
     );

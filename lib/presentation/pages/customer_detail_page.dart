@@ -1,5 +1,6 @@
 import 'package:chapur_ia/presentation/pages/product_catalog_page.dart';
 import 'package:chapur_ia/presentation/pages/account_summary_page.dart';
+import 'package:chapur_ia/presentation/pages/dashboard_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
@@ -56,14 +57,17 @@ class CustomerDetailPage extends StatelessWidget {
       bottomNavigationBar: CustomBottomNav(
         selectedIndex: 0, // Clientes selected
         onItemSelected: (index) {
-          if (index == 0) return; // Already here
-          if (index == 3) {
+          if (index == 3) { // Salir
             context.read<AuthBloc>().add(LogoutRequested());
             Navigator.popUntil(context, (route) => route.isFirst);
             return;
           }
-          // For other indices, we might want to pop and switch tab in Dashboard
-          Navigator.pop(context, index); 
+          
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => DashboardPage(initialIndex: index)),
+            (route) => false,
+          );
         },
       ),
     );

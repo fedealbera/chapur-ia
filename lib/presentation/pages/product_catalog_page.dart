@@ -9,6 +9,7 @@ import 'package:chapur_ia/domain/entities/customer.dart';
 import 'package:chapur_ia/domain/entities/cart_item.dart';
 import '../widgets/cart_icon_badge.dart';
 import '../widgets/custom_bottom_nav.dart';
+import 'dashboard_page.dart';
 
 class ProductCatalogPage extends StatefulWidget {
   final Customer? customer;
@@ -229,13 +230,17 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
         bottomNavigationBar: CustomBottomNav(
           selectedIndex: 1, // Catálogos selected
           onItemSelected: (index) {
-            if (index == 1) return;
-            if (index == 3) {
+            if (index == 3) { // Salir
               context.read<AuthBloc>().add(LogoutRequested());
               Navigator.popUntil(context, (route) => route.isFirst);
               return;
             }
-            Navigator.pop(context, index);
+
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => DashboardPage(initialIndex: index)),
+              (route) => false,
+            );
           },
         ),
       );
