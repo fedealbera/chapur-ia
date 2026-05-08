@@ -121,9 +121,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
     final currencyFormat = NumberFormat.currency(symbol: r'$ ', decimalDigits: 2);
     final dateFormat = DateFormat('dd/MM/yyyy');
 
-    final subtotal = order.total / 1.21;
-    final iva = order.total - subtotal;
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
