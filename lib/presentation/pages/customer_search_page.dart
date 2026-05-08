@@ -41,7 +41,7 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                 controller: _searchController,
                 style: const TextStyle(fontFamily: 'Inter', fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'Buscar producto', // Matching the text in the provided image
+                  hintText: 'Buscar clientes',
                   hintStyle: TextStyle(color: Colors.grey.shade600, fontFamily: 'Inter'),
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(12.0),

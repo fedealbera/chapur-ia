@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:chapur_ia/domain/entities/cart_item.dart';
 import '../blocs/cart/cart_bloc.dart';
 import 'checkout_form_page.dart';
 
@@ -12,8 +13,8 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  // USD currency formatter
-  final _usdFormat = NumberFormat.currency(locale: 'en_US', symbol: 'USD ');
+  // USD currency formatter - matching the catalog style
+  final _usdFormat = NumberFormat.currency(symbol: 'USD ', decimalDigits: 2);
 
   @override
   void initState() {
@@ -27,9 +28,46 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        title: const Text('Mi Carrito'),
+        backgroundColor: const Color(0xFF474747),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: BlocBuilder<CartBloc, CartState>(
+          builder: (context, state) {
+            String customerName = '';
+            if (state is CartLoaded) {
+              customerName = state.cart.customerName ?? '';
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Nuevo pedido',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                if (customerName.isNotEmpty)
+                  Text(
+                    customerName,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
       body: BlocBuilder<CartBloc, CartState>(
         builder: (context, state) {
@@ -68,123 +106,93 @@ class _CartPageState extends State<CartPage> {
 
             return Column(
               children: [
-                if (cart.customerName != null)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                    child: Text(
-                      'Cliente: ${cart.customerName}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6366F1)),
-                    ),
-                  ),
                 Expanded(
-                  child: ListView.separated(
+                  child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: cart.items.length,
-                    separatorBuilder: (_, __) => const Divider(),
                     itemBuilder: (context, index) {
                       final item = cart.items[index];
-                      final unitPriceUsd = item.priceUsd ?? 0.0;
-                      final subtotalUsd = item.subtotalUsd ?? (item.quantity * unitPriceUsd);
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          item.description ?? 'Producto',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 4),
-                            Text('Código: ${item.articleCode}', style: const TextStyle(fontSize: 12)),
-                            Text(
-                              'Cantidad: ${item.quantity} x ${_usdFormat.format(unitPriceUsd)}',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            if (item.ivaRate != null)
-                              Text(
-                                'IVA: ${item.ivaRate!.toStringAsFixed(1)}%  (${_usdFormat.format(item.ivaAmountUsd ?? 0.0)})',
-                                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                              ),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                  _usdFormat.format(subtotalUsd),
-                                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6366F1), fontSize: 13),
-                                ),
-                              ],
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                              onPressed: () {
-                                context.read<CartBloc>().add(RemoveFromCartRequested(item.articleCode));
-                              },
-                            ),
-                          ],
-                        ),
+                      return _CartProductItem(
+                        item: item,
+                        usdFormat: _usdFormat,
                       );
                     },
                   ),
                 ),
-                // ─── Totals panel ─────────────────────────────────────────
+                // ─── Summary Section ──────────────────────────────────────
                 Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, -5),
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 8, bottom: 8),
+                        child: Text(
+                          'RESUMEN DEL PEDIDO',
+                          style: TextStyle(
+                            color: Color(0xFF818080),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            _buildSummaryRow('Subtotal', cart.subtotalUsd),
+                            const SizedBox(height: 12),
+                            _buildSummaryRow('IVA (21%)', cart.ivaTotalUsd),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: Divider(height: 1, color: Color(0xFFF2F2F2)),
+                            ),
+                            _buildSummaryRow('Total', cart.grandTotalUsd, isTotal: true),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                  child: SafeArea(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildSummaryRow('Subtotal', cart.subtotalUsd),
-                        const SizedBox(height: 8),
-                        _buildSummaryRow('IVA Total', cart.ivaTotalUsd),
-                        const Divider(height: 24),
-                        _buildSummaryRow('TOTAL', cart.grandTotalUsd, isTotal: true),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const CheckoutFormPage(),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF6366F1),
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.shopping_bag_outlined, size: 20),
-                                SizedBox(width: 8),
-                                Text('FINALIZAR PEDIDO', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                              ],
-                            ),
-                          ),
+                ),
+                // ─── Bottom Button ────────────────────────────────────────
+                SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CheckoutFormPage(),
                         ),
-                      ],
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD61D26),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    ),
+                    child: const Text(
+                      'Ejecutar pedido',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ),
                 ),
@@ -204,20 +212,186 @@ class _CartPageState extends State<CartPage> {
         Text(
           label,
           style: TextStyle(
-            fontSize: isTotal ? 20 : 16,
+            fontSize: 15,
             fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: isTotal ? Colors.black : Colors.grey.shade600,
+            color: const Color(0xFF474747),
+            fontFamily: 'Inter',
           ),
         ),
         Text(
           _usdFormat.format(amount),
           style: TextStyle(
-            fontSize: isTotal ? 20 : 16,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: isTotal ? const Color(0xFF6366F1) : Colors.black,
+            color: isTotal ? const Color(0xFFDE535C) : const Color(0xFF474747),
+            fontFamily: 'Inter',
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CartProductItem extends StatelessWidget {
+  final CartItem item;
+  final NumberFormat usdFormat;
+
+  const _CartProductItem({
+    required this.item,
+    required this.usdFormat,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final unitPrice = item.priceUsd ?? 0.0;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Product Image
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+            ),
+            child: (item.description != null) // Simplification for demo
+                ? const Icon(Icons.image_not_supported, color: Colors.grey, size: 30) // In real app, item might have imageUrl
+                : const Icon(Icons.image_not_supported, color: Colors.grey, size: 30),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.description ?? 'Producto',
+                        style: const TextStyle(
+                          color: Color(0xFF565656),
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Inter',
+                          height: 1.1,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        context.read<CartBloc>().add(RemoveFromCartRequested(item.articleCode));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Image.asset(
+                          'assets/images/trash.png',
+                          width: 24,
+                          height: 24,
+                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${item.quantity} x ${usdFormat.format(unitPrice)}',
+                  style: const TextStyle(
+                    color: Color(0xFF474747),
+                    fontSize: 14,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      usdFormat.format(unitPrice),
+                      style: const TextStyle(
+                        color: Color(0xFFDE535C),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        _buildIconBtn(context, 'assets/images/less.png', () {
+                          if (item.quantity > 1) {
+                            context.read<CartBloc>().add(
+                              AddToCartRequested(item.copyWith(quantity: -1))
+                            );
+                          }
+                        }),
+                        Container(
+                          width: 30,
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${item.quantity}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        ),
+                        _buildIconBtn(context, 'assets/images/more.png', () {
+                          context.read<CartBloc>().add(
+                            AddToCartRequested(item.copyWith(quantity: 1))
+                          );
+                        }),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconBtn(BuildContext context, String assetPath, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          color: const Color(0xFFF2F2F2),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: Image.asset(
+            assetPath,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.help_outline, size: 14),
+          ),
+        ),
+      ),
     );
   }
 }

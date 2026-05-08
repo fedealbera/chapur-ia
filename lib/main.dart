@@ -43,7 +43,7 @@ class ChapurApp extends StatelessWidget {
           ),
           fontFamily: 'Roboto',
           appBarTheme: const AppBarTheme(
-            centerTitle: true,
+            centerTitle: false,
             elevation: 0,
             backgroundColor: Colors.transparent,
           ),

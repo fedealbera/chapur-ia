@@ -106,7 +106,7 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
               fontSize: 20,
             ),
           ),
-          centerTitle: true,
+          centerTitle: false,
         ),
         body: SafeArea(
           child: Column(
