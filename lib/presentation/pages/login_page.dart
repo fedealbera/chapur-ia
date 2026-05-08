@@ -41,15 +41,14 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  const SizedBox(height: 40),
                   Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        'assets/logo.png', // Guarda aquí tu logo adjunto
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
+                    child: Image.asset(
+                      'assets/images/tcm_logo.png', // Logo de TCM
+                      width: 180,
+                      height: 100,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Container(
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
@@ -68,7 +67,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                    ),
                   ),
                   const SizedBox(height: 24),
                   const Text(
