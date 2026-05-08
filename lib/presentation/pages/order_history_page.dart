@@ -34,28 +34,30 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<OrderBloc, OrderState>(
-      builder: (context, state) {
-        if (state is OrderLoading || state is OrderInitial) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is OrderFailure) {
-          return Center(child: Text('Error: ${state.message}'));
-        } else if (state is OrderListLoaded) {
-          if (state.orders.isEmpty) {
-            return const Center(child: Text('No se encontraron pedidos.'));
+    return Container(
+      color: const Color(0xFFF8F9FA),
+      child: BlocBuilder<OrderBloc, OrderState>(
+        builder: (context, state) {
+          if (state is OrderLoading || state is OrderInitial) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is OrderFailure) {
+            return Center(child: Text('Error: ${state.message}'));
+          } else if (state is OrderListLoaded) {
+            if (state.orders.isEmpty) {
+              return const Center(child: Text('No se encontraron pedidos.'));
+            }
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: state.orders.length,
+              itemBuilder: (context, index) {
+                final order = state.orders[index];
+                return _OrderListItem(order: order);
+              },
+            );
           }
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: state.orders.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final order = state.orders[index];
-              return _OrderListItem(order: order);
-            },
-          );
-        }
-        return const SizedBox.shrink();
-      },
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 }
@@ -66,44 +68,24 @@ class _OrderListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+    final dateFormat = DateFormat('dd/MM/yyyy');
+    final currencyFormat = NumberFormat.currency(symbol: r'$ ', decimalDigits: 2);
     
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      elevation: 1,
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              order.legacyOrderId,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            _buildStatusChip(order.status),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Text('Fecha: ${dateFormat.format(order.date)}'),
-            Text('Cliente: ${order.customerName}'),
-            const SizedBox(height: 8),
-            Text(
-              '\$${order.total.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF6366F1),
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      child: InkWell(
         onTap: () {
           Navigator.push(
             context,
@@ -112,37 +94,77 @@ class _OrderListItem extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(String status) {
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'submitted':
-      case 'confirmed':
-        color = Colors.blue;
-        break;
-      case 'dispatched':
-      case 'delivered':
-        color = Colors.green;
-        break;
-      case 'cancelled':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.orange;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    order.orderNumber,
+                    style: const TextStyle(
+                      fontFamily: 'Inter',
+                      color: Color(0xFF565656),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order.customerName,
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            color: Color(0xFF474747),
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Text(
+                              dateFormat.format(order.date),
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                color: Color(0xFF474747),
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              currencyFormat.format(order.total),
+                              style: const TextStyle(
+                                fontFamily: 'Inter',
+                                color: Color(0xFFD41E24),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward, color: Colors.black, size: 24),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -75,7 +75,7 @@ class _DashboardPageState extends State<DashboardPage> {
           setState(() => _selectedIndex = index);
           
           final itemTitle = navItems[index].title;
-          if (itemTitle == 'Pedidos' || itemTitle == 'Mis Pedidos') {
+          if (itemTitle == 'Mis pedidos') {
             final authState = context.read<AuthBloc>().state;
             if (authState is Authenticated) {
               context.read<OrderBloc>().add(FetchOrdersRequested(
@@ -101,7 +101,7 @@ class _DashboardPageState extends State<DashboardPage> {
           icon: Icons.shopping_bag_outlined,
         ),
         const _NavItem(
-          title: 'Pedidos',
+          title: 'Mis pedidos',
           icon: Icons.history_outlined,
         ),
         const _NavItem(
@@ -121,7 +121,7 @@ class _DashboardPageState extends State<DashboardPage> {
           icon: Icons.shopping_bag_outlined,
         ),
         const _NavItem(
-          title: 'Mis Pedidos',
+          title: 'Mis pedidos',
           icon: Icons.history_outlined,
         ),
         const _NavItem(
