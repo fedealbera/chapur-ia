@@ -1,17 +1,39 @@
 import 'package:flutter/material.dart';
 
+class NavItem {
+  final String title;
+  final String assetPath;
+  final IconData fallbackIcon;
+
+  const NavItem({
+    required this.title,
+    required this.assetPath,
+    required this.fallbackIcon,
+  });
+}
+
 class CustomBottomNav extends StatelessWidget {
   final int selectedIndex;
+  final List<NavItem>? items;
   final Function(int) onItemSelected;
 
   const CustomBottomNav({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
+    this.items,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Default items if none provided (for salesperson/backward compatibility)
+    final List<NavItem> navItems = items ?? const [
+      NavItem(title: 'Clientes', assetPath: 'assets/images/users.png', fallbackIcon: Icons.people_outline),
+      NavItem(title: 'Catálogos', assetPath: 'assets/images/box.png', fallbackIcon: Icons.shopping_bag_outlined),
+      NavItem(title: 'Pedidos', assetPath: 'assets/images/clipboard_notes.png', fallbackIcon: Icons.history_outlined),
+      NavItem(title: 'Salir', assetPath: 'assets/images/exit.png', fallbackIcon: Icons.logout_outlined),
+    ];
+
     return Container(
       height: 80,
       decoration: BoxDecoration(
@@ -26,12 +48,10 @@ class CustomBottomNav extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(0, 'Clientes', 'assets/images/users.png', Icons.people_outline),
-          _buildNavItem(1, 'Catálogos', 'assets/images/box.png', Icons.shopping_bag_outlined),
-          _buildNavItem(2, 'Pedidos', 'assets/images/clipboard_notes.png', Icons.history_outlined),
-          _buildNavItem(3, 'Salir', 'assets/images/exit.png', Icons.logout_outlined),
-        ],
+        children: List.generate(navItems.length, (index) {
+          final item = navItems[index];
+          return _buildNavItem(index, item.title, item.assetPath, item.fallbackIcon);
+        }),
       ),
     );
   }
@@ -43,7 +63,7 @@ class CustomBottomNav extends StatelessWidget {
       child: GestureDetector(
         onTap: () => onItemSelected(index),
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? const Color(0x26C92828) : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
@@ -65,9 +85,10 @@ class CustomBottomNav extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 title,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 12,
+                  fontSize: 10, // Slightly smaller for 4 items with long text
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: const Color(0xFF474747),
                 ),

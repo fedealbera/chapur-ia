@@ -41,7 +41,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final user = userState.user;
     
     // Define navigation items and pages based on role
-    final List<_NavItem> navItems = _getNavItems(user);
+    final List<NavItem> navItems = _getNavItems(user);
     final List<Widget> pages = _getPages(user);
 
     return Scaffold(
@@ -69,15 +69,16 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       bottomNavigationBar: CustomBottomNav(
         selectedIndex: _selectedIndex,
+        items: navItems,
         onItemSelected: (index) {
-          if (index == 3) { // Salir
+          if (index == navItems.length - 1 && navItems[index].title == 'Salir') {
             context.read<AuthBloc>().add(LogoutRequested());
             return;
           }
           setState(() => _selectedIndex = index);
           
           final itemTitle = navItems[index].title;
-          if (itemTitle == 'Mis pedidos') {
+          if (itemTitle == 'Mis pedidos' || itemTitle == 'Pedidos') {
             final authState = context.read<AuthBloc>().state;
             if (authState is Authenticated) {
               context.read<OrderBloc>().add(FetchOrdersRequested(
@@ -91,44 +92,57 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
 
-  List<_NavItem> _getNavItems(User user) {
+  List<NavItem> _getNavItems(User user) {
     if (user.isSalesperson || user.isAdmin) {
       return [
-        const _NavItem(
+        const NavItem(
           title: 'Clientes',
-          icon: Icons.people_outline,
+          assetPath: 'assets/images/users.png',
+          fallbackIcon: Icons.people_outline,
         ),
-        const _NavItem(
+        const NavItem(
           title: 'Catálogos',
-          icon: Icons.shopping_bag_outlined,
+          assetPath: 'assets/images/box.png',
+          fallbackIcon: Icons.shopping_bag_outlined,
         ),
-        const _NavItem(
-          title: 'Mis pedidos',
-          icon: Icons.history_outlined,
+        const NavItem(
+          title: 'Pedidos',
+          assetPath: 'assets/images/clipboard_notes.png',
+          fallbackIcon: Icons.history_outlined,
         ),
-        const _NavItem(
+        const NavItem(
           title: 'Salir',
-          icon: Icons.logout_outlined,
+          assetPath: 'assets/images/exit.png',
+          fallbackIcon: Icons.logout_outlined,
         ),
       ];
     } else {
       // Customer
       return [
-        const _NavItem(
+        const NavItem(
           title: 'Inicio',
-          icon: Icons.home_outlined,
+          assetPath: 'assets/images/home.png', // Assuming home.png exists or use fallback
+          fallbackIcon: Icons.home_outlined,
         ),
-        const _NavItem(
+        const NavItem(
           title: 'Catálogo',
-          icon: Icons.shopping_bag_outlined,
+          assetPath: 'assets/images/box.png',
+          fallbackIcon: Icons.shopping_bag_outlined,
         ),
-        const _NavItem(
-          title: 'Mis pedidos',
-          icon: Icons.history_outlined,
+        const NavItem(
+          title: 'Pedidos',
+          assetPath: 'assets/images/clipboard_notes.png',
+          fallbackIcon: Icons.history_outlined,
         ),
-        const _NavItem(
+        const NavItem(
           title: 'Cuenta',
-          icon: Icons.account_balance_wallet_outlined,
+          assetPath: 'assets/images/ctacte.png',
+          fallbackIcon: Icons.account_balance_wallet_outlined,
+        ),
+        const NavItem(
+          title: 'Salir',
+          assetPath: 'assets/images/exit.png',
+          fallbackIcon: Icons.logout_outlined,
         ),
       ];
     }
@@ -152,14 +166,4 @@ class _DashboardPageState extends State<DashboardPage> {
       ];
     }
   }
-}
-
-class _NavItem {
-  final String title;
-  final IconData icon;
-
-  const _NavItem({
-    required this.title,
-    required this.icon,
-  });
 }
