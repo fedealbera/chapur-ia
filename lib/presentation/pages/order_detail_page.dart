@@ -23,7 +23,6 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   @override
   void initState() {
     super.initState();
-    // Use a fresh instance of OrderBloc to avoid overriding the list in the global scope
     _orderBloc = di.sl<OrderBloc>()..add(FetchOrderDetailRequested(widget.order.id));
   }
 
@@ -37,199 +36,319 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _orderBloc,
-      child: Scaffold(
-        backgroundColor: Colors.grey.shade100,
-        appBar: AppBar(
-          title: const Text('Detalle de Pedido'),
-          backgroundColor: const Color(0xFF1A1F2C),
-          foregroundColor: Colors.white,
-        ),
-        body: BlocBuilder<OrderBloc, OrderState>(
-          builder: (context, state) {
-            Order displayOrder = widget.order;
-            bool isLoading = state is OrderLoading || state is OrderInitial;
+      child: BlocBuilder<OrderBloc, OrderState>(
+        builder: (context, state) {
+          Order displayOrder = widget.order;
+          bool isLoading = state is OrderLoading || state is OrderInitial;
 
-            if (state is OrderDetailLoaded) {
-              displayOrder = Order(
-                id: displayOrder.id,
-                orderNumber: state.order.orderNumber.isNotEmpty ? state.order.orderNumber : displayOrder.orderNumber,
-                legacyOrderId: state.order.legacyOrderId.isNotEmpty ? state.order.legacyOrderId : displayOrder.legacyOrderId,
-                customerAccountNumber: state.order.customerAccountNumber.isNotEmpty ? state.order.customerAccountNumber : displayOrder.customerAccountNumber,
-                customerName: state.order.customerName.isNotEmpty ? state.order.customerName : displayOrder.customerName,
-                date: state.order.date,
-                status: state.order.status.isNotEmpty ? state.order.status : displayOrder.status,
-                total: state.order.total > 0 ? state.order.total : displayOrder.total,
-                items: state.order.items.isNotEmpty ? state.order.items : displayOrder.items,
-              );
-            }
-
-            if (state is OrderFailure) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text(state.message),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        _orderBloc.add(FetchOrderDetailRequested(widget.order.id));
-                      },
-                      child: const Text('Reintentar'),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return Stack(
-              children: [
-                _buildDetail(displayOrder),
-                if (isLoading)
-                  const Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: LinearProgressIndicator(),
-                  ),
-              ],
+          if (state is OrderDetailLoaded) {
+            displayOrder = Order(
+              id: displayOrder.id,
+              orderNumber: state.order.orderNumber.isNotEmpty ? state.order.orderNumber : displayOrder.orderNumber,
+              legacyOrderId: state.order.legacyOrderId.isNotEmpty ? state.order.legacyOrderId : displayOrder.legacyOrderId,
+              customerAccountNumber: state.order.customerAccountNumber.isNotEmpty ? state.order.customerAccountNumber : displayOrder.customerAccountNumber,
+              customerName: state.order.customerName.isNotEmpty ? state.order.customerName : displayOrder.customerName,
+              date: state.order.date,
+              status: state.order.status.isNotEmpty ? state.order.status : displayOrder.status,
+              total: state.order.total > 0 ? state.order.total : displayOrder.total,
+              items: state.order.items.isNotEmpty ? state.order.items : displayOrder.items,
             );
-          },
+          }
+
+          return Scaffold(
+            backgroundColor: const Color(0xFFF8F9FA),
+            appBar: AppBar(
+              backgroundColor: const Color(0xFF474747),
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Colors.white),
+              title: Text(
+                displayOrder.orderNumber,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            bottomNavigationBar: state is OrderFailure ? null : _buildFooter(displayOrder),
+            body: state is OrderFailure
+                ? _buildErrorState(state.message)
+                : Stack(
+                    children: [
+                      _buildContent(displayOrder),
+                      if (isLoading)
+                        const Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: LinearProgressIndicator(
+                            backgroundColor: Colors.transparent,
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFDE535C)),
+                          ),
+                        ),
+                    ],
+                  ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const SizedBox(height: 16),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                _orderBloc.add(FetchOrderDetailRequested(widget.order.id));
+              },
+              child: const Text('Reintentar'),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildDetail(Order order) {
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+  Widget _buildContent(Order order) {
+    final currencyFormat = NumberFormat.currency(symbol: r'$ ', decimalDigits: 2);
+    final dateFormat = DateFormat('dd/MM/yyyy');
+
+    final subtotal = order.total / 1.21;
+    final iva = order.total - subtotal;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Pedido ${order.legacyOrderId.isNotEmpty ? order.legacyOrderId : order.orderNumber}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                      ),
-                      _buildStatusChip(order.status),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  _buildInfoRow('Fecha:', dateFormat.format(order.date)),
-                  _buildInfoRow('Cliente:', order.customerName),
-                  _buildInfoRow('Nº Cuenta:', order.customerAccountNumber),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Artículos',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          ...order.items.map((item) => Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  title: Text(item.description, style: const TextStyle(fontSize: 14)),
-                  subtitle: Text('Cód: ${item.articleCode}  •  Cant: ${item.quantity}', style: const TextStyle(fontSize: 12)),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(currencyFormat.format(item.unitPrice), style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      Text(
-                        currencyFormat.format(item.subtotal),
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6366F1)),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
-          const SizedBox(height: 16),
-          Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('TOTAL', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  Text(
-                    currencyFormat.format(order.total),
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: Color(0xFF6366F1)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 32),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 80,
-            child: Text(label, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
+          // ─── Customer Info Card ──────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Cliente',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    color: Color(0xFF474747),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  order.customerName,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: Color(0xFF4C4C4C),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildInfoRow('Codigo', order.customerAccountNumber, const Color(0xFF5F5F5F)),
+                const SizedBox(height: 8),
+                _buildInfoRow('Fecha', dateFormat.format(order.date), const Color(0xFF474747)),
+              ],
+            ),
           ),
+          const SizedBox(height: 24),
+          
+          // ─── Products Title ──────────────────────────────────────────────
+          const Text(
+            'PRODUCTOS',
+            style: TextStyle(
+              fontFamily: 'Inter',
+              color: Color(0xFF818080),
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // ─── Product Items ───────────────────────────────────────────────
+          ...order.items.map((item) => _buildProductItem(item, currencyFormat)),
+
+          const SizedBox(height: 100), // Space for fixed footer
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFooter(Order order) {
+    final currencyFormat = NumberFormat.currency(symbol: r'$ ', decimalDigits: 2);
+    final subtotal = order.total / 1.21;
+    final iva = order.total - subtotal;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildSummaryRow('Subtotal', currencyFormat.format(subtotal), isLarge: true),
+            const SizedBox(height: 8),
+            _buildSummaryRow('IVA (21%)', currencyFormat.format(iva)),
+            const Divider(height: 20),
+            _buildSummaryRow(
+              'Total', 
+              currencyFormat.format(order.total), 
+              isBold: true, 
+              amountColor: const Color(0xFFDE535C)
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, Color labelColor) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            color: labelColor,
+            fontSize: 14,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            color: labelColor,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductItem(OrderItem item, NumberFormat format) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          // Placeholder for product image matching the capture style
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.image_outlined, color: Colors.grey),
+          ),
+          const SizedBox(width: 16),
           Expanded(
-            child: Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.description,
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: Color(0xFF565656),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '${item.quantity} x ${format.format(item.unitPrice)}',
+                  style: const TextStyle(
+                    fontFamily: 'Inter',
+                    color: Color(0xFF474747),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            format.format(item.subtotal),
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              color: Color(0xFFDE535C),
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatusChip(String status) {
-    Color color;
-    switch (status.toLowerCase()) {
-      case 'submitted':
-      case 'confirmed':
-        color = Colors.blue;
-        break;
-      case 'dispatched':
-      case 'delivered':
-        color = Colors.green;
-        break;
-      case 'cancelled':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.orange;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        status.toUpperCase(),
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
-      ),
+  Widget _buildSummaryRow(String label, String value, {bool isBold = false, bool isLarge = false, Color? amountColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            color: const Color(0xFF474747),
+            fontSize: isLarge ? 16 : 14,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontFamily: 'Inter',
+            color: amountColor ?? const Color(0xFF474747),
+            fontSize: isLarge ? 18 : 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }
