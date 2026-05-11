@@ -208,15 +208,10 @@ class _LoginPageState extends State<LoginPage> {
         ),
         suffixIcon: isPassword
             ? IconButton(
-                icon: Image.asset(
-                  'assets/images/eyes.png',
-                  width: 24,
-                  height: 24,
+                icon: Icon(
+                  obscureText ? Icons.visibility : Icons.visibility_off,
                   color: Colors.grey.shade600,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    obscureText ? Icons.visibility_off : Icons.visibility,
-                    color: Colors.grey.shade600,
-                  ),
+                  size: 24,
                 ),
                 onPressed: onToggleVisibility,
               )
