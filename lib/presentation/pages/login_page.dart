@@ -14,7 +14,6 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   
-  bool _isCustomer = false;
   bool _obscurePassword = true;
 
   @override
@@ -76,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
                       fontFamily: 'Inter',
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF121212),
+                      color: Color(0xFF474747),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -90,92 +89,8 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  
-                  const Text(
-                    'Tipo de Usuario',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF121212),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _isCustomer = false),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: !_isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade300,
-                                width: 2,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.business_center_outlined,
-                                  color: !_isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade600,
-                                  size: 28,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Vendedor',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    color: !_isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _isCustomer = true),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade300,
-                                width: 2,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.person_outline,
-                                  color: _isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade600,
-                                  size: 28,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Cliente',
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontWeight: FontWeight.bold,
-                                    color: _isCustomer ? const Color(0xFFD32F2F) : Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 32),
+
+
                   const Text(
                     'Email / Usuario',
                     style: TextStyle(
@@ -223,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 0,
                         ),

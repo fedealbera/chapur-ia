@@ -73,24 +73,30 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
             if (authState is Authenticated && (authState.user.isSalesperson || authState.user.isAdmin)) {
               return BlocBuilder<CartBloc, CartState>(
                 builder: (context, cartState) {
-                  if (cartState is CartLoaded && cartState.cart.customerAccountNumber == null) {
+                  final bool noCustomer = cartState is CartLoaded && cartState.cart.customerAccountNumber == null;
+                  if (noCustomer) {
                     return Container(
                       width: double.infinity,
                       margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.orange.shade50,
+                        color: const Color(0xFFFFF4E5), // Light orange matching capture
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.orange.shade200),
+                        border: Border.all(color: const Color(0xFFFFD580)), // Orange border
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
-                          Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700),
-                          const SizedBox(width: 12),
-                          const Expanded(
+                          Icon(Icons.warning_amber_rounded, color: Color(0xFFED6C02), size: 28),
+                          SizedBox(width: 12),
+                          Expanded(
                             child: Text(
                               'Debe seleccionar un cliente antes de realizar un pedido.',
-                              style: TextStyle(color: Color(0xFFC05621), fontWeight: FontWeight.bold, fontSize: 13),
+                              style: TextStyle(
+                                color: Color(0xFF663C00), 
+                                fontWeight: FontWeight.bold, 
+                                fontSize: 14,
+                                fontFamily: 'Inter',
+                              ),
                             ),
                           ),
                         ],
@@ -490,6 +496,17 @@ class _ProductListItemState extends State<_ProductListItem> {
               ),
               ElevatedButton(
                 onPressed: _quantity > 0 ? () {
+                  final cartState = context.read<CartBloc>().state;
+                  final authState = context.read<AuthBloc>().state;
+                  
+                  bool isSalesperson = authState is Authenticated && (authState.user.isSalesperson || authState.user.isAdmin);
+                  bool noCustomer = cartState is CartLoaded && cartState.cart.customerAccountNumber == null;
+
+                  if (isSalesperson && noCustomer) {
+                    _showNoCustomerAlert(context);
+                    return;
+                  }
+
                   context.read<CartBloc>().add(
                     AddToCartRequested(
                       CartItem(
@@ -503,7 +520,7 @@ class _ProductListItemState extends State<_ProductListItem> {
                   
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Agregado: $_quantity x ${widget.product.name}'),
+                      content: Text('Agregado: ${widget.product.name}'),
                       backgroundColor: const Color(0xFFD61D26),
                       behavior: SnackBarBehavior.floating,
                       duration: const Duration(seconds: 1),
@@ -588,4 +605,29 @@ class _ProductListItemState extends State<_ProductListItem> {
     );
   }
 
+  void _showNoCustomerAlert(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Color(0xFFED6C02)),
+            SizedBox(width: 8),
+            Text('Atención'),
+          ],
+        ),
+        content: const Text(
+          'Para poder armar el carrito de compras es requerimiento seleccionar a un cliente previamente.',
+          style: TextStyle(fontFamily: 'Inter'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('ENTENDIDO', style: TextStyle(color: Color(0xFFD61D26), fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
 }

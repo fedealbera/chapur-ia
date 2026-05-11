@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import '../blocs/order/order_bloc.dart';
 import '../blocs/cart/cart_bloc.dart';
 
@@ -19,11 +18,6 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
   final _phoneCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
 
-  DateTime? _estimatedDeliveryDate;
-
-  static const _primary = Color(0xFF6366F1);
-  static const _bgColor = Color(0xFFF8F9FF);
-
   @override
   void dispose() {
     _addressCtrl.dispose();
@@ -33,33 +27,8 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
     super.dispose();
   }
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _estimatedDeliveryDate ?? now.add(const Duration(days: 1)),
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: _primary),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() => _estimatedDeliveryDate = picked);
-    }
-  }
-
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-
-    final dateStr = _estimatedDeliveryDate != null
-        ? DateFormat('yyyy-MM-dd').format(_estimatedDeliveryDate!)
-        : null;
 
     context.read<OrderBloc>().add(
           SubmitOrderRequested(
@@ -67,7 +36,6 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
             deliveryContact: _contactCtrl.text.trim(),
             deliveryPhone: _phoneCtrl.text.trim(),
             notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
-            estimatedDeliveryDate: dateStr,
           ),
         );
   }
@@ -90,206 +58,192 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: _bgColor,
+        backgroundColor: const Color(0xFFF8F9FA),
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xFF474747),
           elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
-            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text(
-            'Datos de Entrega',
-            style: TextStyle(
-              color: Colors.black87,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
+          title: BlocBuilder<CartBloc, CartState>(
+            builder: (context, state) {
+              String customerName = '';
+              if (state is CartLoaded) {
+                customerName = state.cart.customerName ?? '';
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Nuevo pedido',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                  if (customerName.isNotEmpty)
+                    Text(
+                      customerName,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
-          centerTitle: false,
         ),
         body: SafeArea(
           child: Column(
             children: [
-              // ─── Progress indicator ────────────────────────────────────
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                child: Row(
-                  children: [
-                    const _StepIndicator(number: '1', label: 'Carrito', done: true),
-                    _StepDivider(),
-                    const _StepIndicator(number: '2', label: 'Entrega', active: true),
-                    _StepDivider(),
-                    const _StepIndicator(number: '3', label: 'Confirmación'),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 4),
-              // ─── Form ─────────────────────────────────────────────────
               Expanded(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const _SectionTitle('Dirección de Entrega'),
-                        const SizedBox(height: 12),
-                        _buildField(
-                          controller: _addressCtrl,
-                          label: 'Dirección completa',
-                          hint: 'Ej: Av. Corrientes 1234, CABA',
-                          icon: Icons.location_on_outlined,
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'La dirección es obligatoria'
-                              : null,
-                          maxLines: 2,
-                        ),
-                        const SizedBox(height: 20),
-                        const _SectionTitle('Contacto'),
-                        const SizedBox(height: 12),
-                        _buildField(
-                          controller: _contactCtrl,
-                          label: 'Persona de contacto',
-                          hint: 'Nombre y apellido',
-                          icon: Icons.person_outline_rounded,
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'El contacto es obligatorio'
-                              : null,
-                        ),
-                        const SizedBox(height: 12),
-                        _buildField(
-                          controller: _phoneCtrl,
-                          label: 'Teléfono',
-                          hint: '+54 11 4555-1234',
-                          icon: Icons.phone_outlined,
-                          keyboardType: TextInputType.phone,
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'El teléfono es obligatorio'
-                              : null,
-                        ),
-                        const SizedBox(height: 20),
-                        const _SectionTitle('Información Adicional'),
-                        const SizedBox(height: 12),
-                        // Date picker
-                        GestureDetector(
-                          onTap: _pickDate,
-                          child: AbsorbPointer(
-                            child: TextFormField(
-                              readOnly: true,
-                              decoration: _inputDecoration(
-                                label: 'Fecha estimada de entrega',
-                                hint: 'Seleccionar fecha (opcional)',
-                                icon: Icons.calendar_today_outlined,
-                              ).copyWith(
-                                suffixIcon: _estimatedDeliveryDate != null
-                                    ? IconButton(
-                                        icon: const Icon(Icons.clear, size: 18),
-                                        onPressed: () => setState(
-                                          () => _estimatedDeliveryDate = null,
-                                        ),
-                                      )
-                                    : null,
-                              ),
-                              controller: TextEditingController(
-                                text: _estimatedDeliveryDate != null
-                                    ? DateFormat('dd/MM/yyyy')
-                                        .format(_estimatedDeliveryDate!)
-                                    : '',
-                              ),
-                            ),
+                        const Text(
+                          'DATOS DE ENVIO',
+                          style: TextStyle(
+                            color: Color(0xFF818080),
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Inter',
                           ),
                         ),
                         const SizedBox(height: 12),
-                        _buildField(
-                          controller: _notesCtrl,
-                          label: 'Observaciones',
-                          hint: 'Instrucciones especiales, horarios, etc. (opcional)',
-                          icon: Icons.notes_rounded,
-                          maxLines: 3,
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey.shade200),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Datos del cliente que se usaran para la entrega',
+                                style: TextStyle(
+                                  color: Color(0xFF474747),
+                                  fontSize: 14,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              _buildFieldLabel('CONTACTO DE ENTREGA'),
+                              const SizedBox(height: 8),
+                              _buildTextField(
+                                controller: _contactCtrl,
+                                hint: 'Nombre de contacto',
+                                validator: (v) => (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                              ),
+                              const SizedBox(height: 20),
+                              _buildFieldLabel('DIRECCION DE ENTREGA'),
+                              const SizedBox(height: 8),
+                              _buildTextField(
+                                controller: _addressCtrl,
+                                hint: 'Calle, Número, Ciudad',
+                                validator: (v) => (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                              ),
+                              const SizedBox(height: 20),
+                              _buildFieldLabel('TELEFONO'),
+                              const SizedBox(height: 8),
+                              _buildTextField(
+                                controller: _phoneCtrl,
+                                hint: 'Número de teléfono',
+                                keyboardType: TextInputType.phone,
+                                validator: (v) => (v == null || v.trim().isEmpty) ? 'Requerido' : null,
+                              ),
+                              const SizedBox(height: 20),
+                              _buildFieldLabel('NOTAS ADICIONALES'),
+                              const SizedBox(height: 8),
+                              _buildTextField(
+                                controller: _notesCtrl,
+                                hint: 'INTRUCCIONES ESPECIALES DE ENTREGA (OPCIONAL)',
+                                maxLines: 3,
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 100), // space for FAB
                       ],
                     ),
                   ),
                 ),
               ),
+              // --- Submit Button ---
+              BlocBuilder<OrderBloc, OrderState>(
+                builder: (context, state) {
+                  final isLoading = state is OrderLoading;
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: isLoading ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD61D26),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Confirmar pedido',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
-        ),
-        // ─── Submit button ───────────────────────────────────────────────
-        bottomNavigationBar: BlocBuilder<OrderBloc, OrderState>(
-          builder: (context, state) {
-            final isLoading = state is OrderLoading;
-            return Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.06),
-                    blurRadius: 12,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: SizedBox(
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: isLoading ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _primary,
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: _primary.withValues(alpha: 0.5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 22,
-                            width: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.check_circle_outline_rounded, size: 20),
-                              SizedBox(width: 8),
-                              Text(
-                                'CONFIRMAR PEDIDO',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ),
-              ),
-            );
-          },
         ),
       ),
     );
   }
 
-  // ─── Helpers ────────────────────────────────────────────────────────────────
+  Widget _buildFieldLabel(String label) {
+    return Text(
+      label,
+      style: const TextStyle(
+        color: Color(0xFF121212),
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        fontFamily: 'Inter',
+      ),
+    );
+  }
 
-  Widget _buildField({
+  Widget _buildTextField({
     required TextEditingController controller,
-    required String label,
     required String hint,
-    required IconData icon,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
     int maxLines = 1,
@@ -299,44 +253,30 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
       maxLines: maxLines,
       keyboardType: keyboardType,
       validator: validator,
-      decoration: _inputDecoration(label: label, hint: hint, icon: icon),
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String label,
-    required String hint,
-    required IconData icon,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon, color: _primary.withValues(alpha: 0.7), size: 20),
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+      style: const TextStyle(fontFamily: 'Inter', fontSize: 15),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFD61D26), width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+        ),
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: _primary, width: 1.8),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.redAccent),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 1.8),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
     );
   }
 
@@ -366,13 +306,13 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
             const SizedBox(height: 20),
             const Text(
               '¡Pedido confirmado!',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
             Text(
               'Tu pedido fue enviado correctamente.\nID: $orderId',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontFamily: 'Inter'),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -380,100 +320,24 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Close dialog, pop checkout, pop cart → back to catalog
                   Navigator.of(ctx).pop();
                   Navigator.of(context)
                     ..pop() // checkout
                     ..pop(); // cart
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _primary,
+                  backgroundColor: const Color(0xFFD61D26),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Volver al inicio', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: const Text('Volver al inicio', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ─── Sub-widgets ──────────────────────────────────────────────────────────────
-
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w700,
-        color: Color(0xFF6366F1),
-        letterSpacing: 0.5,
-      ),
-    );
-  }
-}
-
-class _StepIndicator extends StatelessWidget {
-  final String number;
-  final String label;
-  final bool active;
-  final bool done;
-
-  const _StepIndicator({
-    required this.number,
-    required this.label,
-    this.active = false,
-    this.done = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const primary = Color(0xFF6366F1);
-    final bg = done || active ? primary : Colors.grey.shade200;
-    final fg = done || active ? Colors.white : Colors.grey.shade400;
-    final labelColor = done || active ? Colors.black87 : Colors.grey.shade400;
-
-    return Column(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-          child: Center(
-            child: done
-                ? const Icon(Icons.check_rounded, color: Colors.white, size: 18)
-                : Text(
-                    number,
-                    style: TextStyle(color: fg, fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(fontSize: 11, color: labelColor, fontWeight: FontWeight.w500)),
-      ],
-    );
-  }
-}
-
-class _StepDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: 2,
-        margin: const EdgeInsets.only(bottom: 20),
-        color: Colors.grey.shade200,
       ),
     );
   }

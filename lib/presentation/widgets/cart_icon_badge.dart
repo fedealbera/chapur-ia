@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/cart/cart_bloc.dart';
+import '../blocs/auth/auth_bloc.dart';
 
 import '../pages/cart_page.dart';
 
@@ -20,6 +21,39 @@ class CartIconBadge extends StatelessWidget {
         return GestureDetector(
           onTap: () {
             final cartBloc = context.read<CartBloc>();
+            final cartState = cartBloc.state;
+            final authState = context.read<AuthBloc>().state;
+
+            bool isSalesperson = authState is Authenticated && (authState.user.isSalesperson || authState.user.isAdmin);
+            bool noCustomer = cartState is CartLoaded && cartState.cart.customerAccountNumber == null;
+
+            if (isSalesperson && noCustomer) {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  title: const Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded, color: Color(0xFFED6C02)),
+                      SizedBox(width: 8),
+                      Text('Atención'),
+                    ],
+                  ),
+                  content: const Text(
+                    'Para poder armar el carrito de compras es requerimiento seleccionar a un cliente previamente.',
+                    style: TextStyle(fontFamily: 'Inter'),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('ENTENDIDO', style: TextStyle(color: Color(0xFFD61D26), fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              );
+              return;
+            }
+
             Navigator.push(
               context,
               MaterialPageRoute(
