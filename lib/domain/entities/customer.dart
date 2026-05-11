@@ -13,6 +13,7 @@ class Customer extends Equatable {
   final String? sellerName;
   final String condicionIva;
   final String? phone;
+  final String? email;
   final double? creditLimit;
   final double? currentBalance;
 
@@ -29,6 +30,7 @@ class Customer extends Equatable {
     this.sellerName,
     required this.condicionIva,
     this.phone,
+    this.email,
     this.creditLimit,
     this.currentBalance,
   });
@@ -47,6 +49,7 @@ class Customer extends Equatable {
         sellerName,
         condicionIva,
         phone,
+        email,
         creditLimit,
         currentBalance,
       ];

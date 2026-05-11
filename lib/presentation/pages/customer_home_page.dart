@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/account/account_bloc.dart';
 import '../blocs/customer/customer_bloc.dart';
-import '../../domain/entities/user.dart';
+
 
 class CustomerHomePage extends StatefulWidget {
   final Function(int) onTabSelected;
@@ -45,7 +45,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   Widget build(BuildContext context) {
     final authState = context.watch<AuthBloc>().state;
     if (authState is! Authenticated) return const SizedBox.shrink();
-    final user = authState.user;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -55,175 +54,139 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(user),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 24),
-                    _buildBalanceCard(),
-                    const SizedBox(height: 32),
-                    const Text(
-                      'ACCESOS RÁPIDOS',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF6B7280),
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildQuickAccessGrid(context),
-                    const SizedBox(height: 32),
-                    _buildContactInfo(),
-                    const SizedBox(height: 32),
-                  ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 24),
+                _buildBalanceCard(),
+                const SizedBox(height: 32),
+                const Text(
+                  'ACCESOS RAPIDOS',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF818080),
+                    fontFamily: 'Inter',
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                _buildQuickAccessGrid(context),
+                const SizedBox(height: 32),
+                const Text(
+                  'INFORMACION DE CONTACTO',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF818080),
+                    fontFamily: 'Inter',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildContactInfo(),
+                const SizedBox(height: 32),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(User user) {
-    final initials = user.name.isNotEmpty ? user.name.split(' ').take(2).map((e) => e[0]).join('').toUpperCase() : '??';
+
+
+  Widget _buildBalanceCard() {
+    // Hardcoded values as requested for now
+    const double saldoTotalValue = 2547850;
+    const double vencidoValue = 485000;
 
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 60, 16, 40),
-      decoration: const BoxDecoration(
-        color: Color(0xFF000000), // Dark header as in screenshot
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(0),
-          bottomRight: Radius.circular(0),
-        ),
-      ),
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundColor: const Color(0xFFE11D48), // Red circle in screenshot
-            child: Text(
-              initials,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            user.customerName ?? user.name,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Código: ${user.customerAccountNumber ?? "N/A"}',
-            style: const TextStyle(
-              fontSize: 16,
-              color: Color(0xFF9CA3AF),
-            ),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBalanceCard() {
-    return BlocBuilder<AccountBloc, AccountState>(
-      builder: (context, state) {
-        double saldoActual = 0;
-        double vencido = 0;
-
-        if (state is AccountSummaryLoaded) {
-          saldoActual = state.summary.totalSaldo;
-          final now = DateTime.now();
-          vencido = state.summary.movements.where((m) => m.pendiente > 0 && m.vto.isBefore(now)).fold(0.0, (sum, m) => sum + m.saldoN);
-        }
-
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Saldo total',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF474747),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Inter',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                currencyFormat.format(saldoTotalValue),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF474747),
+                  fontFamily: 'Inter',
+                ),
               ),
             ],
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Saldo Actual',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF6B7280),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    currencyFormat.format(saldoActual),
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF111827),
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFD41E24).withValues(alpha: 0.15), // #D41E2426
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
+                    Image.asset(
+                      'assets/images/alert_red.png',
+                      width: 16,
+                      height: 16,
+                      errorBuilder: (context, error, stackTrace) => 
+                        const Icon(Icons.warning_amber_rounded, color: Color(0xFFD41E24), size: 16),
+                    ),
+                    const SizedBox(width: 6),
                     const Text(
                       'Vencido',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFFE11D48),
+                        color: Color(0xFFD41E24),
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      currencyFormat.format(vencido),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFE11D48),
+                        fontFamily: 'Inter',
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  currencyFormat.format(vencidoValue),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFD41E24),
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -234,34 +197,38 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       crossAxisCount: 2,
       mainAxisSpacing: 16,
       crossAxisSpacing: 16,
-      childAspectRatio: 1.2,
+      childAspectRatio: 1.5,
       children: [
         _buildQuickAccessItem(
           context,
-          'Nuevo Pedido',
+          'Nuevo pedido',
+          'assets/images/shopping_cart_white.png',
           Icons.shopping_cart,
-          const Color(0xFFE11D48),
+          const Color(0xFFD40924),
           () => widget.onTabSelected(1), // Catálogo
         ),
         _buildQuickAccessItem(
           context,
-          'Catálogo',
+          'Catalogo',
+          'assets/images/box_white.png',
           Icons.grid_view_rounded,
-          const Color(0xFF3B82F6),
+          const Color(0xFF2265FF),
           () => widget.onTabSelected(1), // Catálogo
         ),
         _buildQuickAccessItem(
           context,
-          'Mis Pedidos',
+          'Mis pedidos',
+          'assets/images/clipboard_notes_white.png',
           Icons.assignment_outlined,
-          const Color(0xFFF59E0B),
+          const Color(0xFFFB8700),
           () => widget.onTabSelected(2), // Mis Pedidos
         ),
         _buildQuickAccessItem(
           context,
-          'Cuenta Corriente',
+          'Cuenta corriente',
+          'assets/images/ctacte_white.png',
           Icons.credit_card_outlined,
-          const Color(0xFF10B981),
+          const Color(0xFF01B36A),
           () => widget.onTabSelected(3), // Cuenta
         ),
       ],
@@ -271,44 +238,45 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   Widget _buildQuickAccessItem(
     BuildContext context,
     String label,
-    IconData icon,
+    String assetPath,
+    IconData fallbackIcon,
     Color color,
     VoidCallback onTap,
   ) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-          border: Border.all(color: const Color(0xFFF3F4F6)),
+          color: color,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 28),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Image.asset(
+                  assetPath,
+                  width: 24,
+                  height: 24,
+                  color: Colors.white,
+                  errorBuilder: (context, error, stackTrace) => 
+                    Icon(fallbackIcon, color: Colors.white, size: 24),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
             Text(
-              label,
+              label.contains(' ') ? label.replaceFirst(' ', '\n') : label,
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF374151),
+                color: Colors.white,
+                fontFamily: 'Inter',
+                height: 1.1,
               ),
             ),
           ],
@@ -320,14 +288,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   Widget _buildContactInfo() {
     return BlocBuilder<CustomerBloc, CustomerState>(
       builder: (context, state) {
-        String address = 'Cargando...';
-        String phone = 'Cargando...';
-        String cuit = 'Cargando...';
+        String address = '...';
+        String phone = '...';
+        String email = '...';
 
         if (state is CustomerSelected) {
           address = '${state.customer.address}, ${state.customer.city}';
           phone = state.customer.phone ?? 'No disponible';
-          cuit = state.customer.cuit;
+          email = state.customer.email ?? 'No disponible';
         }
 
         return Container(
@@ -336,25 +304,23 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFF3F4F6)),
+            border: Border.all(color: const Color(0xFFEEEEEE)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Información de Contacto',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF111827),
-                ),
-              ),
-              const SizedBox(height: 20),
-              _buildContactRow(Icons.location_on_outlined, address),
+              _buildContactRow('Direccion', address),
               const SizedBox(height: 16),
-              _buildContactRow(Icons.phone_outlined, phone),
+              _buildContactRow('Telefono', phone),
               const SizedBox(height: 16),
-              _buildContactRow(Icons.badge_outlined, 'CUIT: $cuit'),
+              _buildContactRow('Email', email),
             ],
           ),
         );
@@ -362,17 +328,28 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     );
   }
 
-  Widget _buildContactRow(IconData icon, String text) {
+  Widget _buildContactRow(String label, String value) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Icon(icon, size: 20, color: const Color(0xFF9CA3AF)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF474747),
+            fontFamily: 'Inter',
+          ),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
-            text,
+            value,
+            textAlign: TextAlign.end,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF4B5563),
+              color: Color(0xFF696969),
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Inter',
             ),
           ),
         ),

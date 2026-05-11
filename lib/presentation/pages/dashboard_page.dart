@@ -50,15 +50,7 @@ class _DashboardPageState extends State<DashboardPage> {
         backgroundColor: const Color(0xFF474747),
         elevation: 0,
         centerTitle: false,
-        title: Text(
-          navItems[_selectedIndex].title,
-          style: const TextStyle(
-            fontFamily: 'Inter',
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontSize: 20,
-          ),
-        ),
+        title: _buildAppBarTitle(user, navItems),
         actions: const [
           CartIconBadge(),
         ],
@@ -165,5 +157,73 @@ class _DashboardPageState extends State<DashboardPage> {
         const AccountSummaryPage(),
       ];
     }
+  }
+  Widget _buildAppBarTitle(User user, List<NavItem> navItems) {
+    if (!user.isCustomer || _selectedIndex != 0) {
+      return Text(
+        navItems[_selectedIndex].title,
+        style: const TextStyle(
+          fontFamily: 'Inter',
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontSize: 20,
+        ),
+      );
+    }
+
+    final initials = user.name.isNotEmpty 
+      ? user.name.split(' ').take(2).map((e) => e[0]).join('').toUpperCase() 
+      : '??';
+
+    return Row(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: const Color(0xFFD40924),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            initials,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                user.customerName ?? user.name,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                'Código: ${user.customerAccountNumber ?? "N/A"}',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -14,6 +14,7 @@ class CustomerModel extends Customer {
     super.sellerName,
     required super.condicionIva,
     super.phone,
+    super.email,
     super.creditLimit,
     super.currentBalance,
   });
@@ -32,6 +33,7 @@ class CustomerModel extends Customer {
       sellerName: json['sellerName']?.toString(),
       condicionIva: json['condicionIva']?.toString() ?? '',
       phone: json['phone']?.toString(),
+      email: json['email']?.toString(),
       creditLimit: (json['creditLimit'] as num?)?.toDouble(),
       currentBalance: (json['currentBalance'] as num?)?.toDouble(),
     );
@@ -51,6 +53,7 @@ class CustomerModel extends Customer {
       'sellerName': sellerName,
       'condicionIva': condicionIva,
       'phone': phone,
+      'email': email,
       'creditLimit': creditLimit,
       'currentBalance': currentBalance,
     };
