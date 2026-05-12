@@ -166,7 +166,6 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                       style: TextStyle(
                         fontSize: 12,
                         color: Color(0xFFD41E24),
-                        fontWeight: FontWeight.bold,
                         fontFamily: 'Inter',
                       ),
                     ),

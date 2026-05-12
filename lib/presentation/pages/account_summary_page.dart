@@ -14,8 +14,9 @@ import '../widgets/custom_bottom_nav.dart';
 
 class AccountSummaryPage extends StatefulWidget {
   final Customer? customer;
+  final bool showAppBar;
 
-  const AccountSummaryPage({super.key, this.customer});
+  const AccountSummaryPage({super.key, this.customer, this.showAppBar = true});
 
   @override
   State<AccountSummaryPage> createState() => _AccountSummaryPageState();
@@ -100,7 +101,7 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
+      appBar: widget.showAppBar ? AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -118,7 +119,7 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
         backgroundColor: const Color(0xFF474747),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      ) : null,
       body: BlocListener<AccountBloc, AccountState>(
         listener: (context, state) {
           if (state is DocumentPdfLoaded) {
@@ -312,7 +313,7 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
                           const SizedBox(width: 8),
                           const Text(
                             'Vencido',
-                            style: TextStyle(color: Color(0xFFD41E24), fontWeight: FontWeight.bold, fontSize: 16),
+                            style: TextStyle(color: Color(0xFFD41E24), fontSize: 16),
                           ),
                         ],
                       ),

@@ -154,76 +154,105 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         const ProductCatalogPage(),
         const OrderHistoryPage(),
-        const AccountSummaryPage(),
+        const AccountSummaryPage(showAppBar: false),
       ];
     }
   }
   Widget _buildAppBarTitle(User user, List<NavItem> navItems) {
-    if (!user.isCustomer || _selectedIndex != 0) {
-      return Text(
-        navItems[_selectedIndex].title,
-        style: const TextStyle(
-          fontFamily: 'Inter',
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
-          fontSize: 20,
-        ),
+    // Profil header for Home tab (index 0) for customers
+    if (user.isCustomer && _selectedIndex == 0) {
+      final initials = user.name.isNotEmpty 
+        ? user.name.split(' ').take(2).map((e) => e[0]).join('').toUpperCase() 
+        : '??';
+
+      return Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: const Color(0xFFD40924),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              initials,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  user.customerName ?? user.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Inter',
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'Código: ${user.customerAccountNumber ?? "N/A"}',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    fontFamily: 'Inter',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       );
     }
 
-    final initials = user.name.isNotEmpty 
-      ? user.name.split(' ').take(2).map((e) => e[0]).join('').toUpperCase() 
-      : '??';
+    final String title = navItems[_selectedIndex].title;
 
-    return Row(
-      children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: const Color(0xFFD40924),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            initials,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    if (title == 'Cuenta') {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Cuenta Corriente',
+            style: TextStyle(
               fontFamily: 'Inter',
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 18,
             ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                user.customerName ?? user.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Inter',
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                'Código: ${user.customerAccountNumber ?? "N/A"}',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                  fontFamily: 'Inter',
-                ),
-              ),
-            ],
+          Text(
+            user.customerName ?? user.name,
+            style: const TextStyle(
+              fontFamily: 'Inter',
+              color: Colors.white70,
+              fontSize: 13,
+            ),
           ),
-        ),
-      ],
+        ],
+      );
+    }
+
+    return Text(
+      title,
+      style: const TextStyle(
+        fontFamily: 'Inter',
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+        fontSize: 20,
+      ),
     );
   }
 }
