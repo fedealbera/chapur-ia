@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:chapur_ia/core/error/failures.dart';
+import 'package:chapur_ia/core/error/error_handler.dart';
 import 'package:chapur_ia/data/datasources/remote/cart_remote_data_source.dart';
 import 'package:chapur_ia/data/models/cart_model.dart';
 import 'package:chapur_ia/domain/entities/cart.dart';
@@ -17,7 +18,7 @@ class CartRepositoryImpl implements ICartRepository {
       final cart = await remoteDataSource.getCart();
       return Right(cart);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -31,7 +32,7 @@ class CartRepositoryImpl implements ICartRepository {
       await remoteDataSource.addItem(model);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -41,7 +42,7 @@ class CartRepositoryImpl implements ICartRepository {
       await remoteDataSource.removeItem(articleCode);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -51,7 +52,7 @@ class CartRepositoryImpl implements ICartRepository {
       await remoteDataSource.selectCustomer(customerAccountNumber);
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -61,7 +62,7 @@ class CartRepositoryImpl implements ICartRepository {
       await remoteDataSource.clearCart();
       return const Right(null);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 }

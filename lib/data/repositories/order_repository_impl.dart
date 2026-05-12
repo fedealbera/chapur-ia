@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
 import 'package:dartz/dartz.dart' hide Order;
 import 'package:chapur_ia/core/error/failures.dart';
+import 'package:chapur_ia/core/error/error_handler.dart';
 import 'package:chapur_ia/domain/entities/order.dart';
 import 'package:chapur_ia/domain/repositories/i_order_repository.dart';
 import 'package:chapur_ia/data/datasources/remote/order_remote_data_source.dart';
@@ -16,15 +16,7 @@ class OrderRepositoryImpl implements IOrderRepository {
       final orders = await remoteDataSource.getOrders(accountNumber: accountNumber);
       return Right(orders);
     } catch (e) {
-      if (e is DioException) {
-        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
-          return const Left(ServerFailure('El servidor tardó demasiado en responder. Reintente en unos momentos.'));
-        }
-        return Left(ServerFailure('Error de red: ${e.message}'));
-      } else if (e is FormatException) {
-        return Left(ServerFailure(e.message));
-      }
-      return const Left(ServerFailure('Ocurrió un error inesperado al cargar los pedidos.'));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -34,15 +26,7 @@ class OrderRepositoryImpl implements IOrderRepository {
       final order = await remoteDataSource.getOrderDetail(id);
       return Right(order);
     } catch (e) {
-      if (e is DioException) {
-        if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
-          return const Left(ServerFailure('El servidor tardó demasiado en responder. Reintente en unos momentos.'));
-        }
-        return Left(ServerFailure('Error de red: ${e.message}'));
-      } else if (e is FormatException) {
-        return Left(ServerFailure(e.message));
-      }
-      return const Left(ServerFailure('Ocurrió un error inesperado al cargar el detalle del pedido.'));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -64,10 +48,7 @@ class OrderRepositoryImpl implements IOrderRepository {
       );
       return Right(orderId);
     } catch (e) {
-      if (e is DioException) {
-        return Left(ServerFailure('Error al crear el pedido: ${e.message}'));
-      }
-      return const Left(ServerFailure('Ocurrió un error inesperado al crear el pedido.'));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 }

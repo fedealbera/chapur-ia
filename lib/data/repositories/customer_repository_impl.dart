@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../../core/error/failures.dart';
+import '../../core/error/error_handler.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/repositories/i_customer_repository.dart';
 import '../datasources/remote/customer_remote_data_source.dart';
@@ -28,7 +29,7 @@ class CustomerRepositoryImpl implements ICustomerRepository {
 
       return Right(customers);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -38,7 +39,7 @@ class CustomerRepositoryImpl implements ICustomerRepository {
       final customer = await remoteDataSource.getCustomerDetail(accountNumber);
       return Right(customer);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 }

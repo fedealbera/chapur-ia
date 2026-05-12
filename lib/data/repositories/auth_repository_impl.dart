@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../core/error/failures.dart';
+import '../../core/error/error_handler.dart';
 import '../../core/constants/constants.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/i_auth_repository.dart';
@@ -37,16 +37,8 @@ class AuthRepositoryImpl implements IAuthRepository {
       );
 
       return Right(userModel);
-    } on DioException catch (e) {
-      if (e.response?.data is Map) {
-        final data = e.response?.data as Map;
-        if (data.containsKey('error')) {
-          return Left(AuthFailure(data['error'].toString()));
-        }
-      }
-      return Left(AuthFailure(e.message ?? 'Error de conexión'));
     } catch (e) {
-      return Left(AuthFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -65,7 +57,7 @@ class AuthRepositoryImpl implements IAuthRepository {
       }
       return const Right(null);
     } catch (e) {
-      return Left(CacheFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 }

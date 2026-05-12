@@ -1,11 +1,11 @@
+import 'dart:io';
 import 'package:dartz/dartz.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../core/error/failures.dart';
+import '../../../core/error/error_handler.dart';
 import '../../domain/entities/account_summary.dart';
 import '../../domain/repositories/i_account_repository.dart';
 import '../datasources/remote/account_remote_data_source.dart';
-
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
 class AccountRepositoryImpl implements IAccountRepository {
   final IAccountRemoteDataSource remoteDataSource;
@@ -28,7 +28,7 @@ class AccountRepositoryImpl implements IAccountRepository {
       );
       return Right(summary);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -41,7 +41,7 @@ class AccountRepositoryImpl implements IAccountRepository {
       final detail = await remoteDataSource.getDocumentDetail(documentCode, documentNumber);
       return Right(detail);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 
@@ -58,7 +58,7 @@ class AccountRepositoryImpl implements IAccountRepository {
       await file.writeAsBytes(bytes);
       return Right(file.path);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(ErrorHandler.handleException(e));
     }
   }
 }

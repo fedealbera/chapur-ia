@@ -154,7 +154,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         const ProductCatalogPage(),
         const OrderHistoryPage(),
-        const AccountSummaryPage(showAppBar: false),
+        const AccountSummaryPage(showAppBar: false, showBottomNav: false),
       ];
     }
   }

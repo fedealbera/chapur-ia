@@ -15,8 +15,14 @@ import '../widgets/custom_bottom_nav.dart';
 class AccountSummaryPage extends StatefulWidget {
   final Customer? customer;
   final bool showAppBar;
+  final bool showBottomNav;
 
-  const AccountSummaryPage({super.key, this.customer, this.showAppBar = true});
+  const AccountSummaryPage({
+    super.key, 
+    this.customer, 
+    this.showAppBar = true,
+    this.showBottomNav = true,
+  });
 
   @override
   State<AccountSummaryPage> createState() => _AccountSummaryPageState();
@@ -151,7 +157,7 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNav(
+      bottomNavigationBar: widget.showBottomNav ? CustomBottomNav(
         selectedIndex: 0,
         onItemSelected: (index) {
           if (index == 3) { // Salir
@@ -166,7 +172,7 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
             (route) => false,
           );
         },
-      ),
+      ) : null,
     );
   }
 
