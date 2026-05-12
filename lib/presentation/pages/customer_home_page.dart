@@ -116,72 +116,87 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Saldo total',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF474747),
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Inter',
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                currencyFormat.format(saldoTotalValue),
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF474747),
-                  fontFamily: 'Inter',
-                ),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFD41E24).withValues(alpha: 0.15), // #D41E2426
-              borderRadius: BorderRadius.circular(12),
-            ),
+          // Left: Saldo total — takes remaining space
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/images/alert_red.png',
-                      width: 16,
-                      height: 16,
-                      errorBuilder: (context, error, stackTrace) => 
-                        const Icon(Icons.warning_amber_rounded, color: Color(0xFFD41E24), size: 16),
-                    ),
-                    const SizedBox(width: 6),
-                    const Text(
-                      'Vencido',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFFD41E24),
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  currencyFormat.format(vencidoValue),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFD41E24),
+                const Text(
+                  'Saldo total',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF474747),
+                    fontWeight: FontWeight.w500,
                     fontFamily: 'Inter',
                   ),
                 ),
+                const SizedBox(height: 8),
+                // FittedBox auto-scales the number on narrow screens
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    currencyFormat.format(saldoTotalValue),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF474747),
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ),
               ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Right: Vencido — fixed intrinsic width, never overflows
+          IntrinsicWidth(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFD41E24).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/images/alert_red.png',
+                        width: 16,
+                        height: 16,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.warning_amber_rounded,
+                                color: Color(0xFFD41E24), size: 16),
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Vencido',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFFD41E24),
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    currencyFormat.format(vencidoValue),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFD41E24),
+                      fontFamily: 'Inter',
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -269,13 +284,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               ],
             ),
             Text(
-              label.contains(' ') ? label.replaceFirst(' ', '\n') : label,
+              label,
               style: const TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
                 color: Colors.white,
-                fontFamily: 'Inter',
-                height: 1.1,
+                height: 1.2,
               ),
             ),
           ],

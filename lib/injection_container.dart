@@ -62,6 +62,7 @@ Future<void> init() async {
   sl.registerLazySingleton<IAuthRepository>(() => AuthRepositoryImpl(
         remoteDataSource: sl(),
         secureStorage: sl(),
+        cartRepository: sl(),
       ));
   sl.registerLazySingleton<IAuthRemoteDataSource>(
       () => AuthRemoteDataSourceImpl(dio: sl()));

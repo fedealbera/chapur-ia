@@ -6,16 +6,19 @@ import '../../core/error/error_handler.dart';
 import '../../core/constants/constants.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/i_auth_repository.dart';
+import '../../domain/repositories/i_cart_repository.dart';
 import '../datasources/remote/auth_remote_data_source.dart';
 import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
   final IAuthRemoteDataSource remoteDataSource;
   final FlutterSecureStorage secureStorage;
+  final ICartRepository cartRepository;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.secureStorage,
+    required this.cartRepository,
   });
 
   @override
@@ -44,6 +47,11 @@ class AuthRepositoryImpl implements IAuthRepository {
 
   @override
   Future<void> logout() async {
+    // Call DELETE /api/cart before clearing local session.
+    // Silently ignore errors so logout always completes.
+    try {
+      await cartRepository.clearCart();
+    } catch (_) {}
     await secureStorage.delete(key: AppConstants.tokenKey);
     await secureStorage.delete(key: AppConstants.userKey);
   }
