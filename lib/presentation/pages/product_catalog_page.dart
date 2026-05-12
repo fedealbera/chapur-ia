@@ -579,23 +579,32 @@ class _ProductListItemState extends State<_ProductListItem> {
   }
 
   Widget _buildStockText(BuildContext context, String status, int quantity) {
+    final authState = context.read<AuthBloc>().state;
+    final bool isCustomer = authState is Authenticated && authState.user.isCustomer;
+
     Color color;
+    String stockLabel;
+
     switch (status) {
       case 'VERDE':
         color = Colors.green;
+        stockLabel = isCustomer ? 'Disponible' : '$quantity unidades';
         break;
       case 'AMARILLO':
         color = Colors.orange;
+        stockLabel = isCustomer ? 'Stock limitado' : '$quantity unidades';
         break;
       case 'ROJO':
         color = Colors.red;
+        stockLabel = isCustomer ? 'No disponible' : '$quantity unidades';
         break;
       default:
         color = Colors.grey;
+        stockLabel = '$quantity unidades';
     }
 
     return Text(
-      'Stock: $quantity unidades',
+      'Stock: $stockLabel',
       style: TextStyle(
         fontFamily: 'Inter',
         color: color,
