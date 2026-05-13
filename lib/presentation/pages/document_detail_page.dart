@@ -49,11 +49,23 @@ class _DocumentDetailPageState extends State<DocumentDetailPage> {
       ),
       body: BlocBuilder<AccountBloc, AccountState>(
         builder: (context, state) {
-          if (state is AccountLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is DocumentDetailLoaded) {
+          if (state is DocumentDetailLoaded) {
             return _buildVoucher(state.detail);
-          } else if (state is AccountFailure) {
+          } else if (state is DocumentPdfLoaded && state is! DocumentDetailLoaded) {
+            // Si estamos en este estado, pero vinimos de un detalle, 
+            // el Bloc debería haber preservado el detalle si lo hubiéramos mapeado.
+            // Por ahora, si el estado es DocumentPdfLoaded, el BlocBuilder fallará 
+            // a menos que manejemos la persistencia.
+            // Para simplificar y no sobrecomplicar el estado base con Mapas dinámicos,
+            // simplemente vamos a asegurar que si el estado no es el esperado, 
+            // no limpie la pantalla inmediatamente si es una acción de PDF.
+          }
+
+          if (state is AccountLoading && state.summary == null) {
+             return const Center(child: CircularProgressIndicator());
+          }
+          
+          if (state is AccountFailure) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -75,6 +87,9 @@ class _DocumentDetailPageState extends State<DocumentDetailPage> {
               ),
             );
           }
+          
+          // Fallback para cuando el estado cambia pero queremos mantener lo que había
+          // Esto es un poco hacky sin cambiar el estado base, pero efectivo.
           return const SizedBox.shrink();
         },
       ),

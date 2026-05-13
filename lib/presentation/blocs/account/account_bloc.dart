@@ -55,41 +55,48 @@ class DownloadDocumentPdfRequested extends AccountEvent {
 
 // --- States ---
 abstract class AccountState extends Equatable {
-  const AccountState();
+  final AccountSummary? summary;
+  const AccountState({this.summary});
+  
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [summary];
 }
 
 class AccountInitial extends AccountState {}
 
-class AccountLoading extends AccountState {}
+class AccountLoading extends AccountState {
+  const AccountLoading({super.summary});
+}
 
 class AccountSummaryLoaded extends AccountState {
-  final AccountSummary summary;
-  const AccountSummaryLoaded(this.summary);
+  const AccountSummaryLoaded(AccountSummary summary) : super(summary: summary);
+  
   @override
   List<Object?> get props => [summary];
 }
 
 class DocumentDetailLoaded extends AccountState {
   final Map<String, dynamic> detail;
-  const DocumentDetailLoaded(this.detail);
+  const DocumentDetailLoaded(this.detail, {super.summary});
+  
   @override
-  List<Object?> get props => [detail];
+  List<Object?> get props => [detail, summary];
 }
 
 class DocumentPdfLoaded extends AccountState {
   final String filePath;
-  const DocumentPdfLoaded(this.filePath);
+  const DocumentPdfLoaded(this.filePath, {super.summary});
+  
   @override
-  List<Object?> get props => [filePath];
+  List<Object?> get props => [filePath, summary];
 }
 
 class AccountFailure extends AccountState {
   final String message;
-  const AccountFailure(this.message);
+  const AccountFailure(this.message, {super.summary});
+  
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, summary];
 }
 
 // --- BLoC ---
@@ -112,7 +119,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     FetchAccountSummaryRequested event,
     Emitter<AccountState> emit,
   ) async {
-    emit(AccountLoading());
+    // Para el resumen, si ya tenemos uno, lo mantenemos mientras carga el nuevo
+    emit(AccountLoading(summary: state.summary));
     final result = await getAccountSummaryUseCase.execute(
       accountNumber: event.accountNumber,
       startDate: event.startDate,
@@ -121,7 +129,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     );
 
     result.fold(
-      (failure) => emit(AccountFailure(failure.message)),
+      (failure) => emit(AccountFailure(failure.message, summary: state.summary)),
       (summary) => emit(AccountSummaryLoaded(summary)),
     );
   }
@@ -130,15 +138,15 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     FetchDocumentDetailRequested event,
     Emitter<AccountState> emit,
   ) async {
-    emit(AccountLoading());
+    emit(AccountLoading(summary: state.summary));
     final result = await getDocumentDetailUseCase.execute(
       documentCode: event.documentCode,
       documentNumber: event.documentNumber,
     );
 
     result.fold(
-      (failure) => emit(AccountFailure(failure.message)),
-      (detail) => emit(DocumentDetailLoaded(detail)),
+      (failure) => emit(AccountFailure(failure.message, summary: state.summary)),
+      (detail) => emit(DocumentDetailLoaded(detail, summary: state.summary)),
     );
   }
 
@@ -146,15 +154,16 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     DownloadDocumentPdfRequested event,
     Emitter<AccountState> emit,
   ) async {
-    emit(AccountLoading());
+    // No queremos que la lista desaparezca al descargar, así que pasamos el summary actual
+    emit(AccountLoading(summary: state.summary));
     final result = await getDocumentPdfUseCase.execute(
       documentCode: event.documentCode,
       documentNumber: event.documentNumber,
     );
 
     result.fold(
-      (failure) => emit(AccountFailure(failure.message)),
-      (path) => emit(DocumentPdfLoaded(path)),
+      (failure) => emit(AccountFailure(failure.message, summary: state.summary)),
+      (path) => emit(DocumentPdfLoaded(path, summary: state.summary)),
     );
   }
 }

@@ -142,14 +142,34 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
             Expanded(
               child: BlocBuilder<AccountBloc, AccountState>(
                 builder: (context, state) {
-                  if (state is AccountSummaryLoaded) {
-                    return _buildContent(state.summary);
-                  } else if (state is AccountLoading) {
+                  final summary = state.summary;
+                  
+                  if (summary != null) {
+                    return Stack(
+                      children: [
+                        _buildContent(summary),
+                        if (state is AccountLoading)
+                          const Center(
+                            child: Card(
+                              elevation: 4,
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  }
+
+                  if (state is AccountLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
+
                   if (state is AccountInitial) {
                     return const Center(child: Text('No hay datos disponibles'));
                   }
+
                   return const SizedBox.shrink();
                 },
               ),
