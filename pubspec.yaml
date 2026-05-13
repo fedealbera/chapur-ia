@@ -36,7 +36,7 @@ dev_dependencies:
 
 flutter_native_splash:
   color: "#FFFFFF"
-  image: "assets/images/tcm_logo_splash.png"
+  image: "assets/images/tcm_logo_splash_ios.png"
   android_12:
     image: "assets/images/tcm_logo_splash.png"
     color: "#FFFFFF"
@@ -45,6 +45,7 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/images/tcm_logo.png"
+  image_path_ios: "assets/images/tcm_logo_ios_icon.png"
   min_sdk_android: 21
   remove_alpha_ios: true
 
