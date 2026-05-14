@@ -1,4 +1,5 @@
 import '../../domain/entities/user.dart';
+import 'user_balance_model.dart';
 
 class UserModel extends User {
   const UserModel({
@@ -9,6 +10,7 @@ class UserModel extends User {
     super.customerAccountNumber,
     super.customerName,
     super.priceListCode,
+    super.balance,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,9 @@ class UserModel extends User {
       customerAccountNumber: json['customerAccountNumber']?.toString(),
       customerName: json['customerName']?.toString(),
       priceListCode: json['priceListCode']?.toString(),
+      balance: json['balance'] != null
+          ? UserBalanceModel.fromJson(json['balance'])
+          : null,
     );
   }
 
@@ -32,6 +37,7 @@ class UserModel extends User {
       'customerAccountNumber': customerAccountNumber,
       'customerName': customerName,
       'priceListCode': priceListCode,
+      'balance': balance != null ? (balance as UserBalanceModel).toJson() : null,
     };
   }
 }

@@ -15,7 +15,6 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
-  final currencyFormat = NumberFormat.currency(locale: 'es_AR', symbol: '\$ ');
 
   @override
   void initState() {
@@ -60,7 +59,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                _buildBalanceCard(),
+                _buildBalanceCard(authState),
                 const SizedBox(height: 32),
                 const Text(
                   'ACCESOS RAPIDOS',
@@ -96,10 +95,12 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
 
 
-  Widget _buildBalanceCard() {
-    // Hardcoded values as requested for now
-    const double saldoTotalValue = 2547850;
-    const double vencidoValue = 485000;
+  Widget _buildBalanceCard(Authenticated authState) {
+    final balance = authState.user.balance;
+    if (balance == null) return const SizedBox.shrink();
+
+    final String currencySymbol = balance.currency == 'ARS' ? '\$ ' : 'USD ';
+    final format = NumberFormat.currency(locale: 'es_AR', symbol: currencySymbol);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -138,7 +139,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    currencyFormat.format(saldoTotalValue),
+                    format.format(balance.saldoN),
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -187,7 +188,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    currencyFormat.format(vencidoValue),
+                    format.format(balance.vencido),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,

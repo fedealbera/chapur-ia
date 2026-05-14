@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:chapur_ia/domain/entities/cart_item.dart';
 import '../blocs/cart/cart_bloc.dart';
@@ -271,9 +272,21 @@ class _CartProductItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               color: Colors.white,
             ),
-            child: (item.description != null) // Simplification for demo
-                ? const Icon(Icons.image_not_supported, color: Colors.grey, size: 30) // In real app, item might have imageUrl
-                : const Icon(Icons.image_not_supported, color: Colors.grey, size: 30),
+            child: CachedNetworkImage(
+              imageUrl: item.imageUrl ?? '',
+              fit: BoxFit.contain,
+              placeholder: (context, url) => const Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              errorWidget: (context, url, error) {
+                debugPrint('Error loading cart product image: $url - Error: $error');
+                return const Icon(Icons.image_not_supported, color: Colors.grey, size: 30);
+              },
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

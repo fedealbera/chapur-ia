@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chapur_ia/presentation/blocs/product/product_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/auth/auth_bloc.dart';
@@ -411,9 +412,21 @@ class _ProductListItemState extends State<_ProductListItem> {
                   borderRadius: BorderRadius.circular(12),
                   color: Colors.white,
                 ),
-                child: widget.product.imageUrl.isNotEmpty
-                    ? Image.network(widget.product.imageUrl, fit: BoxFit.contain)
-                    : const Icon(Icons.image_not_supported, color: Colors.grey, size: 40),
+                child: CachedNetworkImage(
+                  imageUrl: widget.product.imageUrl,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) {
+                    debugPrint('Error loading product image: $url - Error: $error');
+                    return const Icon(Icons.image_not_supported, color: Colors.grey, size: 40);
+                  },
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -514,6 +527,7 @@ class _ProductListItemState extends State<_ProductListItem> {
                         quantity: _quantity,
                         description: widget.product.name,
                         unitPrice: widget.product.unitPrice,
+                        imageUrl: widget.product.imageUrl,
                       ),
                     ),
                   );

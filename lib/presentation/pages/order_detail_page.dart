@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../blocs/order/order_bloc.dart';
 import '../../injection_container.dart' as di;
@@ -275,10 +276,25 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade100),
             ),
-            child: const Icon(Icons.image_outlined, color: Colors.grey),
+            child: CachedNetworkImage(
+              imageUrl: item.imageUrl,
+              fit: BoxFit.contain,
+              placeholder: (context, url) => const Center(
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              errorWidget: (context, url, error) {
+                debugPrint('Error loading order product image: $url - Error: $error');
+                return const Icon(Icons.image_not_supported, color: Colors.grey, size: 24);
+              },
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

@@ -7,6 +7,7 @@ class OrderItemModel extends OrderItem {
     required super.quantity,
     required super.unitPrice,
     required super.subtotal,
+    required super.imageUrl,
   });
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
@@ -16,6 +17,7 @@ class OrderItemModel extends OrderItem {
       quantity: json['quantity'] ?? json['qty'] ?? 0,
       unitPrice: ((json['unitPrice'] ?? json['price'] ?? 0) as num).toDouble(),
       subtotal: ((json['subtotal'] ?? json['amount'] ?? json['total'] ?? 0) as num).toDouble(),
+      imageUrl: json['imageUrl']?.toString() ?? '',
     );
   }
 
@@ -26,6 +28,7 @@ class OrderItemModel extends OrderItem {
       'quantity': quantity,
       'unitPrice': unitPrice,
       'subtotal': subtotal,
+      'imageUrl': imageUrl,
     };
   }
 }

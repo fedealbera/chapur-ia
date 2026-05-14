@@ -14,6 +14,7 @@ class CartItemModel extends CartItem {
     super.ivaAmount,
     super.ivaAmountUsd,
     super.stockStatus,
+    super.imageUrl,
   });
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +30,7 @@ class CartItemModel extends CartItem {
       ivaAmount: (json['ivaAmount'] as num?)?.toDouble(),
       ivaAmountUsd: (json['ivaAmountUsd'] as num?)?.toDouble(),
       stockStatus: json['stockStatus']?.toString(),
+      imageUrl: json['imageUrl']?.toString(),
     );
   }
 

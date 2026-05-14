@@ -286,7 +286,13 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
   }
 
   Widget _buildTotalizers(AccountSummary summary) {
-    final currencyFormat = NumberFormat.currency(symbol: r'$ ', decimalDigits: 2);
+    String currencySymbol = r'$ ';
+    final authState = context.read<AuthBloc>().state;
+    if (authState is Authenticated && authState.user.isCustomer && authState.user.balance != null) {
+      currencySymbol = authState.user.balance!.currency == 'ARS' ? r'$ ' : 'USD ';
+    }
+    
+    final currencyFormat = NumberFormat.currency(symbol: currencySymbol, decimalDigits: 2);
     
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -476,7 +482,13 @@ class _MovementCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy');
-    final currencyFormat = NumberFormat.currency(symbol: r'$ ', decimalDigits: 2);
+    
+    String currencySymbol = r'$ ';
+    final authState = context.read<AuthBloc>().state;
+    if (authState is Authenticated && authState.user.isCustomer && authState.user.balance != null) {
+      currencySymbol = authState.user.balance!.currency == 'ARS' ? r'$ ' : 'USD ';
+    }
+    final currencyFormat = NumberFormat.currency(symbol: currencySymbol, decimalDigits: 2);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),

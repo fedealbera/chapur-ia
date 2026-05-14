@@ -13,6 +13,7 @@ class CartItem extends Equatable {
   final double? ivaAmount;
   final double? ivaAmountUsd;
   final String? stockStatus;
+  final String? imageUrl;
 
   const CartItem({
     required this.articleCode,
@@ -26,6 +27,7 @@ class CartItem extends Equatable {
     this.ivaAmount,
     this.ivaAmountUsd,
     this.stockStatus,
+    this.imageUrl,
   });
 
   @override
@@ -41,6 +43,7 @@ class CartItem extends Equatable {
         ivaAmount,
         ivaAmountUsd,
         stockStatus,
+        imageUrl,
       ];
 
   CartItem copyWith({
@@ -55,6 +58,7 @@ class CartItem extends Equatable {
     double? ivaAmount,
     double? ivaAmountUsd,
     String? stockStatus,
+    String? imageUrl,
   }) {
     return CartItem(
       articleCode: articleCode ?? this.articleCode,
@@ -68,6 +72,7 @@ class CartItem extends Equatable {
       ivaAmount: ivaAmount ?? this.ivaAmount,
       ivaAmountUsd: ivaAmountUsd ?? this.ivaAmountUsd,
       stockStatus: stockStatus ?? this.stockStatus,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }
