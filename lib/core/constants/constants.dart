@@ -1,6 +1,6 @@
 class AppConstants {
   static const String baseUrl = 'http://190.229.67.119/api';
-  static const String productImageBaseUrl = 'https://www.chapur.com/content/product/';
+  static const String productImageBaseUrl = 'http://190.229.67.119/content/product/';
 
   // Storage Keys
   static const String tokenKey = 'JWT_TOKEN';

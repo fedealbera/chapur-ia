@@ -30,7 +30,8 @@ class CartItemModel extends CartItem {
       ivaAmount: (json['ivaAmount'] as num?)?.toDouble(),
       ivaAmountUsd: (json['ivaAmountUsd'] as num?)?.toDouble(),
       stockStatus: json['stockStatus']?.toString(),
-      imageUrl: json['imageUrl']?.toString(),
+      imageUrl: json['imageUrl']?.toString() ?? 
+                'http://190.229.67.119/content/product/${(json['articleCode']?.toString() ?? '').trim()}.jpg',
     );
   }
 

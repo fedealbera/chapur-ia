@@ -17,7 +17,8 @@ class OrderItemModel extends OrderItem {
       quantity: json['quantity'] ?? json['qty'] ?? 0,
       unitPrice: ((json['unitPrice'] ?? json['price'] ?? 0) as num).toDouble(),
       subtotal: ((json['subtotal'] ?? json['amount'] ?? json['total'] ?? 0) as num).toDouble(),
-      imageUrl: json['imageUrl']?.toString() ?? '',
+      imageUrl: json['imageUrl']?.toString() ?? 
+                'http://190.229.67.119/content/product/${(json['articleCode']?.toString() ?? json['productCode']?.toString() ?? '').trim()}.jpg',
     );
   }
 
