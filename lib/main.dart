@@ -31,7 +31,7 @@ class ChapurApp extends StatelessWidget {
         BlocProvider(create: (_) => di.sl<CartBloc>()),
       ],
       child: MaterialApp(
-        title: 'Chapur IA — Fuerza de Ventas',
+        title: 'TMC — Fuerza de Ventas',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,

@@ -45,8 +45,10 @@ flutter_native_splash:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/tcm_logo.png"
-  image_path_ios: "assets/images/tcm_logo_ios_icon.png"
+  image_path: "assets/images/launcher_icon_ios.png"
+  image_path_ios: "assets/images/launcher_icon_ios.png"
+  adaptive_icon_background: "assets/images/launcher_icon_bg.png"
+  adaptive_icon_foreground: "assets/images/launcher_icon_fg.png"
   min_sdk_android: 21
   remove_alpha_ios: true
 

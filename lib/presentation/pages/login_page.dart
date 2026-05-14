@@ -13,7 +13,7 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
+
   bool _obscurePassword = true;
 
   @override
@@ -48,24 +48,24 @@ class _LoginPageState extends State<LoginPage> {
                       height: 100,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) => Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFC62828),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          alignment: Alignment.center,
-                          child: const Text(
-                            'TMC',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.2,
-                            ),
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFC62828),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Text(
+                          'TMC',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
                           ),
                         ),
                       ),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   const Text(
@@ -89,8 +89,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   const SizedBox(height: 32),
-
-
                   const Text(
                     'Email / Usuario',
                     style: TextStyle(
