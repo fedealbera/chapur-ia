@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart' hide Order;
 import 'package:chapur_ia/core/error/failures.dart';
 import 'package:chapur_ia/domain/entities/order.dart';
+import 'package:chapur_ia/domain/entities/order_confirmation.dart';
 import 'package:chapur_ia/domain/repositories/i_order_repository.dart';
 
 class GetOrdersUseCase {
@@ -28,7 +29,7 @@ class CreateOrderUseCase {
 
   CreateOrderUseCase(this.repository);
 
-  Future<Either<Failure, String>> execute({
+  Future<Either<Failure, OrderConfirmation>> execute({
     required String deliveryAddress,
     required String deliveryContact,
     required String deliveryPhone,

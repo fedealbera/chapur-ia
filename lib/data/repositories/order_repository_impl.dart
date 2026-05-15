@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart' hide Order;
 import 'package:chapur_ia/core/error/failures.dart';
 import 'package:chapur_ia/core/error/error_handler.dart';
 import 'package:chapur_ia/domain/entities/order.dart';
+import 'package:chapur_ia/domain/entities/order_confirmation.dart';
 import 'package:chapur_ia/domain/repositories/i_order_repository.dart';
 import 'package:chapur_ia/data/datasources/remote/order_remote_data_source.dart';
 
@@ -31,7 +32,7 @@ class OrderRepositoryImpl implements IOrderRepository {
   }
 
   @override
-  Future<Either<Failure, String>> createOrder({
+  Future<Either<Failure, OrderConfirmation>> createOrder({
     required String deliveryAddress,
     required String deliveryContact,
     required String deliveryPhone,
@@ -39,14 +40,14 @@ class OrderRepositoryImpl implements IOrderRepository {
     String? estimatedDeliveryDate,
   }) async {
     try {
-      final orderId = await remoteDataSource.createOrder(
+      final confirmation = await remoteDataSource.createOrder(
         deliveryAddress: deliveryAddress,
         deliveryContact: deliveryContact,
         deliveryPhone: deliveryPhone,
         notes: notes,
         estimatedDeliveryDate: estimatedDeliveryDate,
       );
-      return Right(orderId);
+      return Right(confirmation);
     } catch (e) {
       return Left(ErrorHandler.handleException(e));
     }

@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/domain/entities/order.dart';
 import 'package:chapur_ia/domain/usecases/orders/order_use_cases.dart';
+import 'package:chapur_ia/domain/entities/order_confirmation.dart';
 import 'package:chapur_ia/domain/usecases/cart/get_delivery_defaults_use_case.dart';
 import 'package:chapur_ia/domain/entities/delivery_defaults.dart';
 
@@ -98,10 +99,10 @@ class DeliveryDefaultsLoaded extends OrderState {
 }
 
 class OrderSuccess extends OrderState {
-  final String orderId;
-  const OrderSuccess(this.orderId);
+  final OrderConfirmation confirmation;
+  const OrderSuccess(this.confirmation);
   @override
-  List<Object?> get props => [orderId];
+  List<Object?> get props => [confirmation];
 }
 
 class OrderFailure extends OrderState {
@@ -191,7 +192,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
 
     result.fold(
       (failure) => emit(OrderFailure(failure.message)),
-      (orderId) => emit(OrderSuccess(orderId)),
+      (confirmation) => emit(OrderSuccess(confirmation)),
     );
   }
 }

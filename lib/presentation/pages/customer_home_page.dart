@@ -187,13 +187,18 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    format.format(balance.vencido),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFD41E24),
-                      fontFamily: 'Inter',
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      format.format(balance.vencido),
+                      maxLines: 1,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFD41E24),
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ),
                 ],

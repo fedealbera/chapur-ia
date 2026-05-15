@@ -104,7 +104,7 @@ class _OrderListItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    order.orderNumber,
+                    'PED-${order.legacyOrderId}',
                     style: const TextStyle(
                       fontFamily: 'Inter',
                       color: Color(0xFF565656),

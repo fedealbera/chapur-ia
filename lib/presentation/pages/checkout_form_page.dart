@@ -55,7 +55,7 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
         if (state is OrderSuccess) {
           // Reload cart (it should be empty now server-side)
           context.read<CartBloc>().add(LoadCartRequested());
-          _showSuccessDialog(state.orderId);
+          _showSuccessDialog(state.confirmation.softlandId);
         } else if (state is OrderFailure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -303,7 +303,7 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
     );
   }
 
-  void _showSuccessDialog(String orderId) {
+  void _showSuccessDialog(String softlandId) {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -334,7 +334,7 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Tu pedido fue enviado correctamente.\nID: $orderId',
+              'Tu pedido fue enviado correctamente.\nID: $softlandId',
               style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontFamily: 'Inter'),
               textAlign: TextAlign.center,
             ),

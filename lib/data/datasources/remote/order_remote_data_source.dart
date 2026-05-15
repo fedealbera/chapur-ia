@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 import '../../models/order_model.dart';
+import '../../models/order_confirmation_model.dart';
 
 abstract class IOrderRemoteDataSource {
   Future<List<OrderModel>> getOrders({String? accountNumber});
   Future<OrderModel> getOrderDetail(String id);
-  Future<String> createOrder({
+  Future<OrderConfirmationModel> createOrder({
     required String deliveryAddress,
     required String deliveryContact,
     required String deliveryPhone,
@@ -51,7 +52,7 @@ class OrderRemoteDataSourceImpl implements IOrderRemoteDataSource {
   }
 
   @override
-  Future<String> createOrder({
+  Future<OrderConfirmationModel> createOrder({
     required String deliveryAddress,
     required String deliveryContact,
     required String deliveryPhone,
@@ -68,7 +69,11 @@ class OrderRemoteDataSourceImpl implements IOrderRemoteDataSource {
       if (estimatedDeliveryDate != null) data['estimatedDeliveryDate'] = estimatedDeliveryDate;
 
       final response = await dio.post('/orders', data: data);
-      return response.data['orderId'] as String;
+      if (response.data is Map<String, dynamic>) {
+        return OrderConfirmationModel.fromJson(response.data as Map<String, dynamic>);
+      } else {
+        throw const FormatException('La respuesta del servidor no tiene el formato esperado.');
+      }
     } catch (e) {
       rethrow;
     }

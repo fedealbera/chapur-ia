@@ -63,7 +63,7 @@ class _OrderDetailPageState extends State<OrderDetailPage> {
               elevation: 0,
               iconTheme: const IconThemeData(color: Colors.white),
               title: Text(
-                displayOrder.orderNumber,
+                'PED-${displayOrder.legacyOrderId}',
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

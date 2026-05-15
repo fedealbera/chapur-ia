@@ -314,12 +314,17 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
                   style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  currencyFormat.format(summary.totalSaldo),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    currencyFormat.format(summary.totalSaldo),
+                    maxLines: 1,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -350,12 +355,17 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        currencyFormat.format(summary.totalDebe),
-                        style: const TextStyle(
-                          color: Color(0xFFD41E24),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          currencyFormat.format(summary.totalDebe),
+                          maxLines: 1,
+                          style: const TextStyle(
+                            color: Color(0xFFD41E24),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -379,12 +389,17 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
                         style: TextStyle(color: Color(0xFFFF8800), fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        currencyFormat.format(summary.totalHaber),
-                        style: const TextStyle(
-                          color: Color(0xFFFF8800),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          currencyFormat.format(summary.totalHaber),
+                          maxLines: 1,
+                          style: const TextStyle(
+                            color: Color(0xFFFF8800),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -592,12 +607,17 @@ class _MovementCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14, 
-            color: Color(0xFF5F5F5F),
-            fontWeight: FontWeight.w900,
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            maxLines: 1,
+            style: const TextStyle(
+              fontSize: 14, 
+              color: Color(0xFF5F5F5F),
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
       ],
