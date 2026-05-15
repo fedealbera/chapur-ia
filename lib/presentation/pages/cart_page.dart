@@ -108,63 +108,16 @@ class _CartPageState extends State<CartPage> {
             return Column(
               children: [
                 Expanded(
-                  child: ListView.builder(
+                  child: ListView(
                     padding: const EdgeInsets.all(16),
-                    itemCount: cart.items.length,
-                    itemBuilder: (context, index) {
-                      final item = cart.items[index];
-                      return _CartProductItem(
-                        item: item,
-                        usdFormat: _usdFormat,
-                      );
-                    },
-                  ),
-                ),
-                // ─── Summary Section ──────────────────────────────────────
-                Container(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(left: 8, bottom: 8),
-                        child: Text(
-                          'RESUMEN DEL PEDIDO',
-                          style: TextStyle(
-                            color: Color(0xFF818080),
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade200),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            _buildSummaryRow('Subtotal', cart.subtotalUsd),
-                            const SizedBox(height: 12),
-                            _buildSummaryRow('IVA (21%)', cart.ivaTotalUsd),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              child: Divider(height: 1, color: Color(0xFFF2F2F2)),
-                            ),
-                            _buildSummaryRow('Total', cart.grandTotalUsd, isTotal: true),
-                          ],
-                        ),
-                      ),
+                      ...cart.items.map((item) => _CartProductItem(
+                            item: item,
+                            usdFormat: _usdFormat,
+                          )),
+                      const SizedBox(height: 16),
+                      // ─── Summary Section ──────────────────────────────────────
+                      _buildSummarySection(state),
                     ],
                   ),
                 ),
@@ -206,7 +159,256 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  Widget _buildSummaryRow(String label, double amount, {bool isTotal = false}) {
+  Widget _buildSummarySection(CartLoaded state) {
+    final cart = state.cart;
+    final discounts = state.discounts;
+
+    final double subtotal = cart.subtotalUsd;
+    final double iva21 = (discounts?.iva21 ?? 0) > 0 ? discounts!.iva21 : cart.ivaTotalUsd;
+    final double iva105 = discounts?.iva105 ?? 0.0;
+    final double total = (discounts?.total ?? 0) > 0 ? discounts!.total : cart.grandTotalUsd;
+
+    final bool showDiscounts = discounts != null &&
+        discounts.appliesDiscounts &&
+        (discounts.dcgAmount > 0 || discounts.volumeDiscountAmount > 0);
+
+    final bool showFinancials = discounts != null &&
+        !discounts.isBiglieri &&
+        (discounts.financial30DFFAmount > 0 || discounts.financialCashAmount > 0);
+
+    return Container(
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Resumen Header
+          const Padding(
+            padding: EdgeInsets.only(left: 8, bottom: 8),
+            child: Text(
+              'RESUMEN DEL PEDIDO',
+              style: TextStyle(
+                color: Color(0xFF818080),
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Inter',
+              ),
+            ),
+          ),
+          // Resumen Box
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                _buildSummaryRow('Subtotal', subtotal),
+                const SizedBox(height: 12),
+                _buildSummaryRow('IVA 21%', iva21),
+                if (iva105 > 0) ...[
+                  const SizedBox(height: 12),
+                  _buildSummaryRow('IVA 10.5%', iva105),
+                ],
+                const SizedBox(height: 12),
+                _buildSummaryRowText('Costo de Envío', 'GRATIS', textColor: Colors.green),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Divider(height: 1, color: Color(0xFFF2F2F2)),
+                ),
+                _buildSummaryRow('Total del Pedido', total, isTotal: true),
+              ],
+            ),
+          ),
+          
+          if (showDiscounts) ...[
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.only(left: 8, bottom: 8),
+              child: Text(
+                '🏷  DESCUENTOS',
+                style: TextStyle(
+                  color: Color(0xFF818080),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  if (discounts.dcgAmount > 0)
+                    _buildDiscountRow('Dto. Comercial 25%', discounts.dcgAmount),
+                  if (!discounts.isBiglieri && discounts.volumeDiscountAmount > 0) ...[
+                    if (discounts.dcgAmount > 0) const SizedBox(height: 12),
+                    _buildDiscountRow('Dto. por Volumen', discounts.volumeDiscountAmount),
+                    if (discounts.grpMaq > 0) _buildSubDiscountRow('MAQ (10%)', discounts.grpMaq),
+                    if (discounts.grpAcc > 0) _buildSubDiscountRow('ACC (5%)', discounts.grpAcc),
+                    if (discounts.grpRep > 0) _buildSubDiscountRow('REP (8%)', discounts.grpRep),
+                  ],
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(height: 1, color: Color(0xFFF2F2F2)),
+                  ),
+                  _buildSummaryRow('Total c/Dto. Comercial', discounts.montoTotal2, isBoldText: true),
+                ],
+              ),
+            ),
+          ],
+
+          if (showFinancials) ...[
+            const SizedBox(height: 16),
+            const Padding(
+              padding: EdgeInsets.only(left: 8, bottom: 8),
+              child: Text(
+                '💳  DESCUENTOS OPCIONALES',
+                style: TextStyle(
+                  color: Color(0xFF818080),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  if (discounts.financial30DFFAmount > 0) ...[
+                    _buildDiscountRow('Dto. 30 D F/F 15%', discounts.financial30DFFAmount),
+                    const SizedBox(height: 8),
+                    _buildSummaryRow('Total c/Dto. 30 D F/F', discounts.montoTotal3, isBoldText: true),
+                  ],
+                  if (discounts.financial30DFFAmount > 0 && discounts.financialCashAmount > 0)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Divider(height: 1, color: Color(0xFFF2F2F2)),
+                    ),
+                  if (discounts.financialCashAmount > 0) ...[
+                    _buildDiscountRow('Dto. Contado 5%', discounts.financialCashAmount),
+                    const SizedBox(height: 8),
+                    _buildSummaryRow('Total c/Dto. Contado', discounts.montoTotal4, isBoldText: true),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRowText(String label, String text, {Color? textColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 15,
+            color: Color(0xFF474747),
+            fontFamily: 'Inter',
+          ),
+        ),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: textColor ?? const Color(0xFF474747),
+            fontFamily: 'Inter',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDiscountRow(String label, double amount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 15,
+            color: Color(0xFF474747),
+            fontFamily: 'Inter',
+          ),
+        ),
+        Text(
+          '-${_usdFormat.format(amount)}',
+          style: const TextStyle(
+            fontSize: 15,
+            color: Color(0xFF474747),
+            fontFamily: 'Inter',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSubDiscountRow(String label, double amount) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, top: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF818080),
+              fontFamily: 'Inter',
+            ),
+          ),
+          Text(
+            '-${_usdFormat.format(amount)}',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF818080),
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, double amount, {bool isTotal = false, bool isBoldText = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -214,7 +416,7 @@ class _CartPageState extends State<CartPage> {
           label,
           style: TextStyle(
             fontSize: 15,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+            fontWeight: isTotal || isBoldText ? FontWeight.bold : FontWeight.normal,
             color: const Color(0xFF474747),
             fontFamily: 'Inter',
           ),

@@ -7,6 +7,8 @@ import 'package:chapur_ia/domain/usecases/cart/add_item_to_cart_use_case.dart';
 import 'package:chapur_ia/domain/usecases/cart/clear_cart_use_case.dart';
 import 'package:chapur_ia/domain/usecases/cart/remove_item_from_cart_use_case.dart';
 import 'package:chapur_ia/domain/usecases/cart/select_cart_customer_use_case.dart';
+import 'package:chapur_ia/domain/entities/cart_discounts.dart';
+import 'package:chapur_ia/domain/usecases/cart/get_cart_discounts_use_case.dart';
 
 // --- Events ---
 abstract class CartEvent extends Equatable {
@@ -53,9 +55,10 @@ class CartLoading extends CartState {}
 
 class CartLoaded extends CartState {
   final Cart cart;
-  const CartLoaded(this.cart);
+  final CartDiscounts? discounts;
+  const CartLoaded(this.cart, {this.discounts});
   @override
-  List<Object?> get props => [cart];
+  List<Object?> get props => [cart, discounts];
 }
 
 class CartFailure extends CartState {
@@ -72,6 +75,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   final ClearCartUseCase clearCartUseCase;
   final RemoveItemFromCartUseCase removeItemFromCartUseCase;
   final SelectCartCustomerUseCase selectCartCustomerUseCase;
+  final GetCartDiscountsUseCase getCartDiscountsUseCase;
 
   CartBloc({
     required this.getCartUseCase,
@@ -79,6 +83,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     required this.clearCartUseCase,
     required this.removeItemFromCartUseCase,
     required this.selectCartCustomerUseCase,
+    required this.getCartDiscountsUseCase,
   }) : super(CartInitial()) {
     on<LoadCartRequested>(_onLoadCart);
     on<AddToCartRequested>(_onAddToCart);
@@ -90,9 +95,18 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   Future<void> _onLoadCart(LoadCartRequested event, Emitter<CartState> emit) async {
     emit(CartLoading());
     final result = await getCartUseCase.execute();
-    result.fold(
-      (failure) => emit(CartFailure(failure.message)),
-      (cart) => emit(CartLoaded(cart)),
+    
+    await result.fold(
+      (failure) async => emit(CartFailure(failure.message)),
+      (cart) async {
+        final discountsResult = await getCartDiscountsUseCase.execute();
+        CartDiscounts? discounts;
+        discountsResult.fold(
+          (failure) => null, // Just ignore discounts error if it fails
+          (d) => discounts = d,
+        );
+        emit(CartLoaded(cart, discounts: discounts));
+      },
     );
   }
 

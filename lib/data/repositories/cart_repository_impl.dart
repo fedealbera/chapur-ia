@@ -3,6 +3,7 @@ import 'package:chapur_ia/core/error/failures.dart';
 import 'package:chapur_ia/core/error/error_handler.dart';
 import 'package:chapur_ia/data/datasources/remote/cart_remote_data_source.dart';
 import 'package:chapur_ia/data/models/cart_model.dart';
+import 'package:chapur_ia/data/models/cart_discounts_model.dart';
 import 'package:chapur_ia/domain/entities/cart.dart';
 import 'package:chapur_ia/domain/entities/cart_item.dart';
 import 'package:chapur_ia/domain/repositories/i_cart_repository.dart';
@@ -61,6 +62,16 @@ class CartRepositoryImpl implements ICartRepository {
     try {
       await remoteDataSource.clearCart();
       return const Right(null);
+    } catch (e) {
+      return Left(ErrorHandler.handleException(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, CartDiscountsModel?>> getDiscounts() async {
+    try {
+      final discounts = await remoteDataSource.getDiscounts();
+      return Right(discounts);
     } catch (e) {
       return Left(ErrorHandler.handleException(e));
     }
