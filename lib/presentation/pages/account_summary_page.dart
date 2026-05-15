@@ -551,14 +551,14 @@ class _MovementCard extends StatelessWidget {
                     Expanded(child: _buildItemInfo('Vencimiento', dateFormat.format(movement.vto), alignment: CrossAxisAlignment.end)),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     Expanded(child: _buildItemInfo('DEBE', currencyFormat.format(movement.debeN))),
                     Expanded(child: _buildItemInfo('HABER', currencyFormat.format(movement.haberN), alignment: CrossAxisAlignment.end)),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
                 Center(
                   child: _buildItemInfo('SALDO', currencyFormat.format(movement.saldoN), isBold: true, alignment: CrossAxisAlignment.center),
                 ),
@@ -567,7 +567,7 @@ class _MovementCard extends StatelessWidget {
                   child: Divider(height: 1),
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton.icon(
                       onPressed: onVisualize,
@@ -575,7 +575,6 @@ class _MovementCard extends StatelessWidget {
                       label: const Text('Ver', style: TextStyle(fontWeight: FontWeight.bold)),
                       style: TextButton.styleFrom(foregroundColor: const Color(0xFF474747)),
                     ),
-                    const SizedBox(width: 12),
                     ElevatedButton.icon(
                       onPressed: onDownload,
                       icon: const Icon(Icons.share, size: 18),
