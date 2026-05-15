@@ -548,16 +548,19 @@ class _MovementCard extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(child: _buildItemInfo('Fecha', dateFormat.format(movement.fecha))),
-                    Expanded(child: _buildItemInfo('Vencimiento', dateFormat.format(movement.vto))),
+                    Expanded(child: _buildItemInfo('Vencimiento', dateFormat.format(movement.vto), alignment: CrossAxisAlignment.end)),
                   ],
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(child: _buildItemInfo('DEBE', currencyFormat.format(movement.debeN))),
-                    Expanded(child: _buildItemInfo('HABER', currencyFormat.format(movement.haberN))),
-                    Expanded(child: _buildItemInfo('SALDO', currencyFormat.format(movement.saldoN), isBold: true)),
+                    Expanded(child: _buildItemInfo('HABER', currencyFormat.format(movement.haberN), alignment: CrossAxisAlignment.end)),
                   ],
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: _buildItemInfo('SALDO', currencyFormat.format(movement.saldoN), isBold: true, alignment: CrossAxisAlignment.center),
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -594,9 +597,9 @@ class _MovementCard extends StatelessWidget {
     );
   }
 
-  Widget _buildItemInfo(String label, String value, {bool isBold = false}) {
+  Widget _buildItemInfo(String label, String value, {bool isBold = false, CrossAxisAlignment alignment = CrossAxisAlignment.start}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: alignment,
       children: [
         Text(
           label,
@@ -609,7 +612,9 @@ class _MovementCard extends StatelessWidget {
         const SizedBox(height: 6),
         FittedBox(
           fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
+          alignment: alignment == CrossAxisAlignment.start 
+              ? Alignment.centerLeft 
+              : (alignment == CrossAxisAlignment.end ? Alignment.centerRight : Alignment.center),
           child: Text(
             value,
             maxLines: 1,
