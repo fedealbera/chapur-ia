@@ -19,6 +19,14 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
   final _notesCtrl = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderBloc>().add(FetchDeliveryDefaultsRequested());
+    });
+  }
+
+  @override
   void dispose() {
     _addressCtrl.dispose();
     _contactCtrl.dispose();
@@ -55,6 +63,21 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
               backgroundColor: Colors.redAccent,
             ),
           );
+        } else if (state is DeliveryDefaultsLoaded) {
+          final defaults = state.defaults;
+          if (_addressCtrl.text.isEmpty) {
+            String combinedAddress = defaults.deliveryAddress;
+            if (defaults.deliveryPostalCode.isNotEmpty) {
+              combinedAddress += '. CP ${defaults.deliveryPostalCode}.';
+            }
+            _addressCtrl.text = combinedAddress;
+          }
+          if (_contactCtrl.text.isEmpty && defaults.deliveryContact != null) {
+            _contactCtrl.text = defaults.deliveryContact!;
+          }
+          if (_phoneCtrl.text.isEmpty && defaults.deliveryPhone != null) {
+            _phoneCtrl.text = defaults.deliveryPhone!;
+          }
         }
       },
       child: Scaffold(
@@ -333,7 +356,8 @@ class _CheckoutFormPageState extends State<CheckoutFormPage> {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Volver al inicio', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
+                child:
+                    const Text('Volver al inicio', style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter')),
               ),
             ),
           ],

@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:chapur_ia/core/error/failures.dart';
 import 'package:chapur_ia/domain/entities/cart.dart';
 import 'package:chapur_ia/domain/entities/cart_item.dart';
+import 'package:chapur_ia/domain/entities/delivery_defaults.dart';
 
 abstract class ICartRepository {
   Future<Either<Failure, Cart>> getCart();
@@ -11,4 +12,5 @@ abstract class ICartRepository {
   Future<Either<Failure, void>> selectCustomer(String customerAccountNumber);
   Future<Either<Failure, void>> clearCart();
   Future<Either<Failure, CartDiscountsModel?>> getDiscounts();
+  Future<Either<Failure, DeliveryDefaults?>> getDeliveryDefaults();
 }

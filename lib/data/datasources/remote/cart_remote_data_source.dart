@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:chapur_ia/data/models/cart_model.dart';
 import 'package:chapur_ia/data/models/cart_discounts_model.dart';
+import 'package:chapur_ia/data/models/delivery_defaults_model.dart';
 
 abstract class ICartRemoteDataSource {
   Future<CartModel> getCart();
@@ -9,6 +10,7 @@ abstract class ICartRemoteDataSource {
   Future<void> selectCustomer(String customerAccountNumber);
   Future<void> clearCart();
   Future<CartDiscountsModel?> getDiscounts();
+  Future<DeliveryDefaultsModel?> getDeliveryDefaults();
 }
 
 class CartRemoteDataSourceImpl implements ICartRemoteDataSource {
@@ -75,6 +77,16 @@ class CartRemoteDataSourceImpl implements ICartRemoteDataSource {
       return CartDiscountsModel.fromJson(response.data as Map<String, dynamic>);
     } catch (e) {
       // If it fails or returns 404, we return null or empty discounts
+      return null;
+    }
+  }
+
+  @override
+  Future<DeliveryDefaultsModel?> getDeliveryDefaults() async {
+    try {
+      final response = await dio.get('/cart/delivery-defaults');
+      return DeliveryDefaultsModel.fromJson(response.data as Map<String, dynamic>);
+    } catch (e) {
       return null;
     }
   }

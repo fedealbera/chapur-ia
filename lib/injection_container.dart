@@ -49,6 +49,7 @@ import 'package:chapur_ia/domain/usecases/cart/clear_cart_use_case.dart';
 import 'package:chapur_ia/domain/usecases/cart/remove_item_from_cart_use_case.dart';
 import 'package:chapur_ia/domain/usecases/cart/select_cart_customer_use_case.dart';
 import 'package:chapur_ia/domain/usecases/cart/get_cart_discounts_use_case.dart';
+import 'package:chapur_ia/domain/usecases/cart/get_delivery_defaults_use_case.dart';
 import 'package:chapur_ia/presentation/blocs/cart/cart_bloc.dart';
 
 final sl = GetIt.instance;
@@ -97,6 +98,7 @@ Future<void> init() async {
         getOrdersUseCase: sl(),
         getOrderDetailUseCase: sl(),
         createOrderUseCase: sl(),
+        getDeliveryDefaultsUseCase: sl(),
       ));
   sl.registerLazySingleton(() => GetOrdersUseCase(sl()));
   sl.registerLazySingleton(() => GetOrderDetailUseCase(sl()));
@@ -135,6 +137,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => RemoveItemFromCartUseCase(sl()));
   sl.registerLazySingleton(() => SelectCartCustomerUseCase(sl()));
   sl.registerLazySingleton(() => GetCartDiscountsUseCase(sl()));
+  sl.registerLazySingleton(() => GetDeliveryDefaultsUseCase(repository: sl()));
   sl.registerLazySingleton<ICartRepository>(
       () => CartRepositoryImpl(remoteDataSource: sl()));
   sl.registerLazySingleton<ICartRemoteDataSource>(

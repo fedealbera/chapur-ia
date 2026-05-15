@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/domain/entities/order.dart';
 import 'package:chapur_ia/domain/usecases/orders/order_use_cases.dart';
+import 'package:chapur_ia/domain/usecases/cart/get_delivery_defaults_use_case.dart';
+import 'package:chapur_ia/domain/entities/delivery_defaults.dart';
 
 // --- Events ---
 abstract class OrderEvent extends Equatable {
@@ -23,6 +25,8 @@ class FetchOrderDetailRequested extends OrderEvent {
   @override
   List<Object?> get props => [orderId];
 }
+
+class FetchDeliveryDefaultsRequested extends OrderEvent {}
 
 /* 
   Since the API manages the cart on the server side (/api/cart),
@@ -86,6 +90,13 @@ class OrderDetailLoaded extends OrderState {
   List<Object?> get props => [order];
 }
 
+class DeliveryDefaultsLoaded extends OrderState {
+  final DeliveryDefaults defaults;
+  const DeliveryDefaultsLoaded(this.defaults);
+  @override
+  List<Object?> get props => [defaults];
+}
+
 class OrderSuccess extends OrderState {
   final String orderId;
   const OrderSuccess(this.orderId);
@@ -105,15 +116,18 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final GetOrdersUseCase getOrdersUseCase;
   final GetOrderDetailUseCase getOrderDetailUseCase;
   final CreateOrderUseCase createOrderUseCase;
+  final GetDeliveryDefaultsUseCase? getDeliveryDefaultsUseCase;
 
   OrderBloc({
     required this.getOrdersUseCase,
     required this.getOrderDetailUseCase,
     required this.createOrderUseCase,
+    this.getDeliveryDefaultsUseCase,
   }) : super(OrderInitial()) {
     on<FetchOrdersRequested>(_onFetchOrders);
     on<FetchOrderDetailRequested>(_onFetchOrderDetail);
     on<SubmitOrderRequested>(_onSubmitOrder);
+    on<FetchDeliveryDefaultsRequested>(_onFetchDeliveryDefaults);
     // AddToCart logic would typically go into a CartDataSource/Repository
     // For now, focusing on Order flow as per the task list.
   }
@@ -139,6 +153,26 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     result.fold(
       (failure) => emit(OrderFailure(failure.message)),
       (order) => emit(OrderDetailLoaded(order)),
+    );
+  }
+
+  Future<void> _onFetchDeliveryDefaults(
+    FetchDeliveryDefaultsRequested event,
+    Emitter<OrderState> emit,
+  ) async {
+    if (getDeliveryDefaultsUseCase == null) return;
+    emit(OrderLoading());
+    final result = await getDeliveryDefaultsUseCase!.execute();
+    result.fold(
+      (failure) => emit(OrderFailure(failure.message)),
+      (defaults) {
+        if (defaults != null) {
+          emit(DeliveryDefaultsLoaded(defaults));
+        } else {
+          // If null, we just emit initial state or handled empty
+          emit(OrderInitial());
+        }
+      },
     );
   }
 
