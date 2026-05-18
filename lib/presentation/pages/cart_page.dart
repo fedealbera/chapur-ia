@@ -164,8 +164,8 @@ class _CartPageState extends State<CartPage> {
     final discounts = state.discounts;
 
     final double subtotal = cart.subtotalUsd;
-    final double iva21 = (discounts?.iva21 ?? 0) > 0 ? discounts!.iva21 : cart.ivaTotalUsd;
-    final double iva105 = discounts?.iva105 ?? 0.0;
+    final double iva21 = (discounts?.iva21 ?? 0) > 0 ? discounts!.iva21 : cart.iva21Usd;
+    final double iva105 = (discounts?.iva105 ?? 0) > 0 ? discounts!.iva105 : cart.iva105Usd;
     final double total = (discounts?.total ?? 0) > 0 ? discounts!.total : cart.grandTotalUsd;
 
     final bool showDiscounts = discounts != null &&
@@ -214,7 +214,7 @@ class _CartPageState extends State<CartPage> {
                 _buildSummaryRow('Subtotal', subtotal),
                 const SizedBox(height: 12),
                 _buildSummaryRow('IVA 21%', iva21),
-                if (iva105 > 0) ...[
+                if (iva105 != 0) ...[
                   const SizedBox(height: 12),
                   _buildSummaryRow('IVA 10.5%', iva105),
                 ],

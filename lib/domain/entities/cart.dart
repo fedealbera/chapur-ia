@@ -10,6 +10,8 @@ class Cart extends Equatable {
   final double subtotalUsd;
   final double ivaTotalUsd;
   final double grandTotalUsd;
+  final double iva21Usd;
+  final double iva105Usd;
   final String? customerAccountNumber;
   final String? customerName;
 
@@ -21,6 +23,8 @@ class Cart extends Equatable {
     this.subtotalUsd = 0.0,
     this.ivaTotalUsd = 0.0,
     this.grandTotalUsd = 0.0,
+    this.iva21Usd = 0.0,
+    this.iva105Usd = 0.0,
     this.customerAccountNumber,
     this.customerName,
   });
@@ -34,6 +38,8 @@ class Cart extends Equatable {
         subtotalUsd,
         ivaTotalUsd,
         grandTotalUsd,
+        iva21Usd,
+        iva105Usd,
         customerAccountNumber,
         customerName,
       ];

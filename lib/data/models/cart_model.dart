@@ -52,6 +52,8 @@ class CartModel extends Cart {
     super.subtotalUsd,
     super.ivaTotalUsd,
     super.grandTotalUsd,
+    super.iva21Usd,
+    super.iva105Usd,
     super.customerAccountNumber,
     super.customerName,
   });
@@ -69,6 +71,8 @@ class CartModel extends Cart {
       subtotalUsd: (json['subtotalUsd'] as num?)?.toDouble() ?? 0.0,
       ivaTotalUsd: (json['ivaTotalUsd'] as num?)?.toDouble() ?? 0.0,
       grandTotalUsd: (json['grandTotalUsd'] as num?)?.toDouble() ?? 0.0,
+      iva21Usd: (json['iva21Usd'] as num?)?.toDouble() ?? 0.0,
+      iva105Usd: (json['iva105Usd'] as num?)?.toDouble() ?? 0.0,
       customerAccountNumber: json['customerAccountNumber']?.toString(),
       customerName: json['customerName']?.toString(),
     );

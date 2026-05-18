@@ -163,6 +163,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
             subtotalUsd: 0.0,
             ivaTotalUsd: 0.0,
             grandTotalUsd: 0.0,
+            iva21Usd: 0.0,
+            iva105Usd: 0.0,
           ))),
     );
   }
