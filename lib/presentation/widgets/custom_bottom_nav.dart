@@ -35,7 +35,6 @@ class CustomBottomNav extends StatelessWidget {
     ];
 
     return Container(
-      height: 80,
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -46,12 +45,18 @@ class CustomBottomNav extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(navItems.length, (index) {
-          final item = navItems[index];
-          return _buildNavItem(index, item.title, item.assetPath, item.fallbackIcon);
-        }),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(navItems.length, (index) {
+              final item = navItems[index];
+              return _buildNavItem(index, item.title, item.assetPath, item.fallbackIcon);
+            }),
+          ),
+        ),
       ),
     );
   }
