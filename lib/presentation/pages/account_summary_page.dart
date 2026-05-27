@@ -129,7 +129,13 @@ class _AccountSummaryPageState extends State<AccountSummaryPage> {
       body: BlocListener<AccountBloc, AccountState>(
         listener: (context, state) {
           if (state is DocumentPdfLoaded) {
-            Share.shareXFiles([XFile(state.filePath)], text: 'Comprobante PDF');
+            final box = context.findRenderObject() as RenderBox?;
+            final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+            Share.shareXFiles(
+              [XFile(state.filePath)],
+              text: 'Comprobante PDF',
+              sharePositionOrigin: rect,
+            );
           } else if (state is AccountFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message), backgroundColor: Colors.red),

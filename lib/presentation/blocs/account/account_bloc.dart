@@ -56,28 +56,28 @@ class DownloadDocumentPdfRequested extends AccountEvent {
 // --- States ---
 abstract class AccountState extends Equatable {
   final AccountSummary? summary;
-  const AccountState({this.summary});
+  final Map<String, dynamic>? detail;
+  const AccountState({this.summary, this.detail});
   
   @override
-  List<Object?> get props => [summary];
+  List<Object?> get props => [summary, detail];
 }
 
 class AccountInitial extends AccountState {}
 
 class AccountLoading extends AccountState {
-  const AccountLoading({super.summary});
+  const AccountLoading({super.summary, super.detail});
 }
 
 class AccountSummaryLoaded extends AccountState {
-  const AccountSummaryLoaded(AccountSummary summary) : super(summary: summary);
+  const AccountSummaryLoaded(AccountSummary summary, {super.detail}) : super(summary: summary);
   
   @override
-  List<Object?> get props => [summary];
+  List<Object?> get props => [summary, detail];
 }
 
 class DocumentDetailLoaded extends AccountState {
-  final Map<String, dynamic> detail;
-  const DocumentDetailLoaded(this.detail, {super.summary});
+  const DocumentDetailLoaded(Map<String, dynamic> detail, {super.summary}) : super(detail: detail);
   
   @override
   List<Object?> get props => [detail, summary];
@@ -85,18 +85,18 @@ class DocumentDetailLoaded extends AccountState {
 
 class DocumentPdfLoaded extends AccountState {
   final String filePath;
-  const DocumentPdfLoaded(this.filePath, {super.summary});
+  const DocumentPdfLoaded(this.filePath, {super.summary, super.detail});
   
   @override
-  List<Object?> get props => [filePath, summary];
+  List<Object?> get props => [filePath, summary, detail];
 }
 
 class AccountFailure extends AccountState {
   final String message;
-  const AccountFailure(this.message, {super.summary});
+  const AccountFailure(this.message, {super.summary, super.detail});
   
   @override
-  List<Object?> get props => [message, summary];
+  List<Object?> get props => [message, summary, detail];
 }
 
 // --- BLoC ---
@@ -120,7 +120,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     Emitter<AccountState> emit,
   ) async {
     // Para el resumen, si ya tenemos uno, lo mantenemos mientras carga el nuevo
-    emit(AccountLoading(summary: state.summary));
+    emit(AccountLoading(summary: state.summary, detail: state.detail));
     final result = await getAccountSummaryUseCase.execute(
       accountNumber: event.accountNumber,
       startDate: event.startDate,
@@ -129,8 +129,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     );
 
     result.fold(
-      (failure) => emit(AccountFailure(failure.message, summary: state.summary)),
-      (summary) => emit(AccountSummaryLoaded(summary)),
+      (failure) => emit(AccountFailure(failure.message, summary: state.summary, detail: state.detail)),
+      (summary) => emit(AccountSummaryLoaded(summary, detail: state.detail)),
     );
   }
 
@@ -138,14 +138,14 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     FetchDocumentDetailRequested event,
     Emitter<AccountState> emit,
   ) async {
-    emit(AccountLoading(summary: state.summary));
+    emit(AccountLoading(summary: state.summary, detail: state.detail));
     final result = await getDocumentDetailUseCase.execute(
       documentCode: event.documentCode,
       documentNumber: event.documentNumber,
     );
 
     result.fold(
-      (failure) => emit(AccountFailure(failure.message, summary: state.summary)),
+      (failure) => emit(AccountFailure(failure.message, summary: state.summary, detail: state.detail)),
       (detail) => emit(DocumentDetailLoaded(detail, summary: state.summary)),
     );
   }
@@ -154,16 +154,16 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     DownloadDocumentPdfRequested event,
     Emitter<AccountState> emit,
   ) async {
-    // No queremos que la lista desaparezca al descargar, así que pasamos el summary actual
-    emit(AccountLoading(summary: state.summary));
+    // No queremos que la lista/detalle desaparezca al descargar, así que pasamos el estado actual
+    emit(AccountLoading(summary: state.summary, detail: state.detail));
     final result = await getDocumentPdfUseCase.execute(
       documentCode: event.documentCode,
       documentNumber: event.documentNumber,
     );
 
     result.fold(
-      (failure) => emit(AccountFailure(failure.message, summary: state.summary)),
-      (path) => emit(DocumentPdfLoaded(path, summary: state.summary)),
+      (failure) => emit(AccountFailure(failure.message, summary: state.summary, detail: state.detail)),
+      (path) => emit(DocumentPdfLoaded(path, summary: state.summary, detail: state.detail)),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import '../blocs/account/account_bloc.dart';
 
 class DocumentDetailPage extends StatefulWidget {
@@ -47,51 +48,73 @@ class _DocumentDetailPageState extends State<DocumentDetailPage> {
           ),
         ],
       ),
-      body: BlocBuilder<AccountBloc, AccountState>(
-        builder: (context, state) {
-          if (state is DocumentDetailLoaded) {
-            return _buildVoucher(state.detail);
-          } else if (state is DocumentPdfLoaded && state is! DocumentDetailLoaded) {
-            // Si estamos en este estado, pero vinimos de un detalle, 
-            // el Bloc debería haber preservado el detalle si lo hubiéramos mapeado.
-            // Por ahora, si el estado es DocumentPdfLoaded, el BlocBuilder fallará 
-            // a menos que manejemos la persistencia.
-            // Para simplificar y no sobrecomplicar el estado base con Mapas dinámicos,
-            // simplemente vamos a asegurar que si el estado no es el esperado, 
-            // no limpie la pantalla inmediatamente si es una acción de PDF.
-          }
-
-          if (state is AccountLoading && state.summary == null) {
-             return const Center(child: CircularProgressIndicator());
-          }
-          
-          if (state is AccountFailure) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(state.message),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<AccountBloc>().add(FetchDocumentDetailRequested(
-                            documentCode: widget.documentCode,
-                            documentNumber: widget.documentNumber,
-                          ));
-                    },
-                    child: const Text('Reintentar'),
-                  ),
-                ],
-              ),
+      body: BlocListener<AccountBloc, AccountState>(
+        listener: (context, state) {
+          if (state is DocumentPdfLoaded) {
+            final box = context.findRenderObject() as RenderBox?;
+            final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+            Share.shareXFiles(
+              [XFile(state.filePath)],
+              text: 'Comprobante PDF',
+              sharePositionOrigin: rect,
+            );
+          } else if (state is AccountFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message), backgroundColor: Colors.red),
             );
           }
-          
-          // Fallback para cuando el estado cambia pero queremos mantener lo que había
-          // Esto es un poco hacky sin cambiar el estado base, pero efectivo.
-          return const SizedBox.shrink();
         },
+        child: BlocBuilder<AccountBloc, AccountState>(
+          builder: (context, state) {
+            final detail = state.detail;
+            if (detail != null) {
+              return Stack(
+                children: [
+                  _buildVoucher(detail),
+                  if (state is AccountLoading)
+                    const Center(
+                      child: Card(
+                        elevation: 4,
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            }
+
+            if (state is AccountLoading) {
+               return const Center(child: CircularProgressIndicator());
+            }
+            
+            if (state is AccountFailure) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text(state.message),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<AccountBloc>().add(FetchDocumentDetailRequested(
+                              documentCode: widget.documentCode,
+                              documentNumber: widget.documentNumber,
+                            ));
+                      },
+                      child: const Text('Reintentar'),
+                    ),
+                  ],
+                ),
+              );
+            }
+            
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
