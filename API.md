@@ -76,7 +76,15 @@ Autentica al usuario y devuelve un JWT.
     "role": "Customer",
     "customerAccountNumber": "000123",
     "customerName": "ACME S.A.",
-    "priceListCode": "13"
+    "priceListCode": "13",
+    "sellerCode": "",
+    "balance": null,
+  },
+  "exchangeRate": {
+    "from": "ARS",
+    "to": "USD",
+    "rate": 1459,
+    "asOf": "2026-05-27T00:00:00"
   }
 }
 ```
