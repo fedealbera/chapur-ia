@@ -10,6 +10,7 @@ import 'package:chapur_ia/domain/entities/customer.dart';
 import 'package:chapur_ia/domain/entities/cart_item.dart';
 import '../widgets/cart_icon_badge.dart';
 import '../widgets/custom_bottom_nav.dart';
+import '../widgets/exchange_rate_widget.dart';
 import 'dashboard_page.dart';
 
 class ProductCatalogPage extends StatefulWidget {
@@ -218,6 +219,8 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               Text(
                 widget.customer!.name,
@@ -226,10 +229,14 @@ class _ProductCatalogPageState extends State<ProductCatalogPage> {
                   fontSize: 12,
                   color: Colors.white70,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
           actions: const [
+            ExchangeRateWidget(),
+            SizedBox(width: 8),
             CartIconBadge(),
           ],
         ),

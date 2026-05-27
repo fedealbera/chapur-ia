@@ -9,6 +9,7 @@ import '../../domain/repositories/i_auth_repository.dart';
 import '../../domain/repositories/i_cart_repository.dart';
 import '../datasources/remote/auth_remote_data_source.dart';
 import '../models/user_model.dart';
+import '../models/exchange_rate_model.dart';
 
 class AuthRepositoryImpl implements IAuthRepository {
   final IAuthRemoteDataSource remoteDataSource;
@@ -30,7 +31,11 @@ class AuthRepositoryImpl implements IAuthRepository {
       final response = await remoteDataSource.login(email, password);
       
       final token = response['token'];
-      final userModel = UserModel.fromJson(response['user']);
+      final exchangeRateJson = response['exchangeRate'];
+      final exchangeRate = exchangeRateJson != null
+          ? ExchangeRateModel.fromJson(exchangeRateJson)
+          : null;
+      final userModel = UserModel.fromJson(response['user'], exchangeRate: exchangeRate);
 
       // Persist token and user data
       await secureStorage.write(key: AppConstants.tokenKey, value: token);

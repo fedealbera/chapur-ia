@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'user_balance.dart';
+import 'exchange_rate.dart';
 
 class User extends Equatable {
   final String id;
@@ -10,6 +11,7 @@ class User extends Equatable {
   final String? customerName;
   final String? priceListCode;
   final UserBalance? balance;
+  final ExchangeRate? exchangeRate;
 
   const User({
     required this.id,
@@ -20,6 +22,7 @@ class User extends Equatable {
     this.customerName,
     this.priceListCode,
     this.balance,
+    this.exchangeRate,
   });
 
   bool get isAdmin => role == 'Admin';
@@ -36,5 +39,6 @@ class User extends Equatable {
         customerName,
         priceListCode,
         balance,
+        exchangeRate,
       ];
 }

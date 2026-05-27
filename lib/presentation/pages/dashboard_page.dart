@@ -9,6 +9,7 @@ import 'account_summary_page.dart';
 import 'customer_home_page.dart';
 import 'package:chapur_ia/domain/entities/user.dart';
 import '../widgets/cart_icon_badge.dart';
+import '../widgets/exchange_rate_widget.dart';
 import '../blocs/cart/cart_bloc.dart';
 import '../blocs/order/order_bloc.dart';
 
@@ -51,8 +52,12 @@ class _DashboardPageState extends State<DashboardPage> {
         elevation: 0,
         centerTitle: false,
         title: _buildAppBarTitle(user, navItems),
-        actions: const [
-          CartIconBadge(),
+        actions: [
+          if (_selectedIndex == 1) ...[
+            const ExchangeRateWidget(),
+            const SizedBox(width: 8),
+          ],
+          const CartIconBadge(),
         ],
       ),
       body: IndexedStack(
@@ -209,6 +214,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     fontSize: 13,
                     fontFamily: 'Inter',
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -232,6 +239,8 @@ class _DashboardPageState extends State<DashboardPage> {
               color: Colors.white,
               fontSize: 18,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           Text(
             user.customerName ?? user.name,
@@ -240,6 +249,8 @@ class _DashboardPageState extends State<DashboardPage> {
               color: Colors.white70,
               fontSize: 13,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       );
@@ -253,6 +264,8 @@ class _DashboardPageState extends State<DashboardPage> {
         color: Colors.white,
         fontSize: 20,
       ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
