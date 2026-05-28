@@ -12,7 +12,17 @@ class AuthInterceptor extends Interceptor {
     // No inyectar token en el endpoint de login
     if (!options.path.contains('/auth/login')) {
       final token = await secureStorage.read(key: AppConstants.tokenKey);
-      if (token != null) {
+      
+      if (token == 'GUEST_MODE') {
+        if (options.path.contains('/products')) {
+          options.path = options.path.replaceFirst(RegExp(r'/products(/search)?'), '/products/guest');
+          
+          if (options.queryParameters.containsKey('q')) {
+            options.queryParameters['search'] = options.queryParameters.remove('q');
+          }
+          options.headers['X-Api-Key'] = 'tmc_izhRjMSY41kg0jNBTcouLynUbNISku8i';
+        }
+      } else if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
       }
     }

@@ -23,6 +23,8 @@ class LogoutRequested extends AuthEvent {}
 
 class AuthCheckRequested extends AuthEvent {}
 
+class LoginAsGuestRequested extends AuthEvent {}
+
 // --- States ---
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -62,6 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<LoginRequested>(_onLoginRequested);
     on<LogoutRequested>(_onLogoutRequested);
+    on<LoginAsGuestRequested>(_onLoginAsGuestRequested);
   }
 
   Future<void> _onAuthCheckRequested(
@@ -103,5 +106,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     await authRepository.logout();
     emit(Unauthenticated());
+  }
+
+  Future<void> _onLoginAsGuestRequested(
+    LoginAsGuestRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await authRepository.loginAsGuest();
+    result.fold(
+      (failure) => emit(AuthFailureState(failure.message)),
+      (user) => emit(Authenticated(user)),
+    );
   }
 }

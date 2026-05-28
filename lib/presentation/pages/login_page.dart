@@ -160,6 +160,30 @@ class _LoginPageState extends State<LoginPage> {
                       );
                     },
                   ),
+                  const SizedBox(height: 16),
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      return OutlinedButton(
+                        onPressed: state is AuthLoading ? null : _onLoginAsGuest,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFD32F2F),
+                          side: const BorderSide(color: Color(0xFFD32F2F), width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          'INGRESAR COMO INVITADO',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 32),
                   const Text(
                     'CHAPUR S.A. - TMC',
@@ -249,5 +273,9 @@ class _LoginPageState extends State<LoginPage> {
             LoginRequested(_emailController.text, _passwordController.text),
           );
     }
+  }
+
+  void _onLoginAsGuest() {
+    context.read<AuthBloc>().add(LoginAsGuestRequested());
   }
 }

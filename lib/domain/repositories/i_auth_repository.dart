@@ -11,4 +11,6 @@ abstract class IAuthRepository {
   Future<void> logout();
 
   Future<Either<Failure, User?>> getAuthenticatedUser();
+
+  Future<Either<Failure, User>> loginAsGuest();
 }

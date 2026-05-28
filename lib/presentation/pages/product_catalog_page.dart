@@ -366,8 +366,9 @@ class _ProductListItemState extends State<_ProductListItem> {
   void _increment() {
     final authState = context.read<AuthBloc>().state;
     final bool isCustomer = authState is Authenticated && authState.user.isCustomer;
+    final bool isGuest = authState is Authenticated && authState.user.isGuest;
 
-    if (isCustomer || _quantity < widget.product.stockQuantity) {
+    if (isCustomer || isGuest || _quantity < widget.product.stockQuantity) {
       setState(() {
         _quantity++;
       });
@@ -515,9 +516,16 @@ class _ProductListItemState extends State<_ProductListItem> {
                 ],
               ),
               ElevatedButton(
-                onPressed: _quantity > 0 ? () {
-                  final cartState = context.read<CartBloc>().state;
+                onPressed: () {
                   final authState = context.read<AuthBloc>().state;
+                  if (authState is Authenticated && authState.user.isGuest) {
+                    _showGuestAuthModal(context);
+                    return;
+                  }
+                  
+                  if (_quantity == 0) return;
+
+                  final cartState = context.read<CartBloc>().state;
                   
                   bool isSalesperson = authState is Authenticated && (authState.user.isSalesperson || authState.user.isAdmin);
                   bool noCustomer = cartState is CartLoaded && cartState.cart.customerAccountNumber == null;
@@ -547,11 +555,10 @@ class _ProductListItemState extends State<_ProductListItem> {
                       duration: const Duration(seconds: 1),
                     ),
                   );
-                  
                   setState(() {
                     _quantity = 0; 
                   });
-                } : null,
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFD61D26),
                   foregroundColor: Colors.white,
@@ -655,6 +662,39 @@ class _ProductListItemState extends State<_ProductListItem> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('ENTENDIDO', style: TextStyle(color: Color(0xFFD61D26), fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showGuestAuthModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.lock_outline, color: Color(0xFFD61D26)),
+            SizedBox(width: 8),
+            Text('Acceso Restringido'),
+          ],
+        ),
+        content: const Text(
+          'Para poder proceder deberá autenticarse.',
+          style: TextStyle(fontFamily: 'Inter'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCELAR', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.read<AuthBloc>().add(LogoutRequested());
+            },
+            child: const Text('INICIAR SESIÓN', style: TextStyle(color: Color(0xFFD61D26), fontWeight: FontWeight.bold)),
           ),
         ],
       ),

@@ -53,18 +53,18 @@ class _DashboardPageState extends State<DashboardPage> {
         centerTitle: false,
         title: _buildAppBarTitle(user, navItems),
         actions: [
-          if (_selectedIndex == 1) ...[
+          if (_selectedIndex == 1 && !user.isGuest) ...[
             const ExchangeRateWidget(),
             const SizedBox(width: 8),
           ],
-          const CartIconBadge(),
+          if (!user.isGuest) const CartIconBadge(),
         ],
       ),
       body: IndexedStack(
         index: _selectedIndex,
         children: pages,
       ),
-      bottomNavigationBar: CustomBottomNav(
+      bottomNavigationBar: user.isGuest ? null : CustomBottomNav(
         selectedIndex: _selectedIndex,
         items: navItems,
         onItemSelected: (index) {
@@ -90,7 +90,15 @@ class _DashboardPageState extends State<DashboardPage> {
 
 
   List<NavItem> _getNavItems(User user) {
-    if (user.isSalesperson || user.isAdmin) {
+    if (user.isGuest) {
+      return [
+        const NavItem(
+          title: 'Catálogo',
+          assetPath: 'assets/images/box.png',
+          fallbackIcon: Icons.shopping_bag_outlined,
+        ),
+      ];
+    } else if (user.isSalesperson || user.isAdmin) {
       return [
         const NavItem(
           title: 'Clientes',
@@ -146,7 +154,11 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   List<Widget> _getPages(User user) {
-    if (user.isSalesperson || user.isAdmin) {
+    if (user.isGuest) {
+      return [
+        const ProductCatalogPage(),
+      ];
+    } else if (user.isSalesperson || user.isAdmin) {
       return [
         const CustomerSearchPage(),
         const ProductCatalogPage(),

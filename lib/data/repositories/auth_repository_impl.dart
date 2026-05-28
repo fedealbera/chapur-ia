@@ -73,4 +73,26 @@ class AuthRepositoryImpl implements IAuthRepository {
       return Left(ErrorHandler.handleException(e));
     }
   }
+
+  @override
+  Future<Either<Failure, User>> loginAsGuest() async {
+    try {
+      const guestModel = UserModel(
+        id: 'guest',
+        email: '',
+        name: 'Invitado',
+        role: 'Guest',
+      );
+
+      await secureStorage.write(key: AppConstants.tokenKey, value: 'GUEST_MODE');
+      await secureStorage.write(
+        key: AppConstants.userKey, 
+        value: jsonEncode(guestModel.toJson()),
+      );
+
+      return const Right(guestModel);
+    } catch (e) {
+      return Left(ErrorHandler.handleException(e));
+    }
+  }
 }

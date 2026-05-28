@@ -28,6 +28,7 @@ class User extends Equatable {
   bool get isAdmin => role == 'Admin';
   bool get isSalesperson => role == 'Salesperson';
   bool get isCustomer => role == 'Customer';
+  bool get isGuest => role == 'Guest';
 
   @override
   List<Object?> get props => [
