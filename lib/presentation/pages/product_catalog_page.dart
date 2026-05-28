@@ -392,6 +392,8 @@ class _ProductListItemState extends State<_ProductListItem> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.read<AuthBloc>().state;
+    final bool isGuest = authState is Authenticated && authState.user.isGuest;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -476,15 +478,16 @@ class _ProductListItemState extends State<_ProductListItem> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     const SizedBox(height: 2),
-                    Text(
-                      NumberFormat.currency(symbol: 'USD ', decimalDigits: 2).format(widget.product.unitPrice),
-                      style: const TextStyle(
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w900,
-                        fontSize: 19,
-                        color: Color(0xFFDE535C),
+                    if (!isGuest)
+                      Text(
+                        NumberFormat.currency(symbol: 'USD ', decimalDigits: 2).format(widget.product.unitPrice),
+                        style: const TextStyle(
+                          fontFamily: 'Inter',
+                          fontWeight: FontWeight.w900,
+                          fontSize: 19,
+                          color: Color(0xFFDE535C),
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 4),
                     _buildStockText(context, widget.product.stockStatus, widget.product.stockQuantity),
                   ],
