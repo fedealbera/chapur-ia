@@ -28,6 +28,7 @@ Este documento sirve como referencia central sobre la arquitectura, stack tecnol
   * `Admin`: Administrador del portal.
   * `Salesperson`: Vendedor.
   * `Customer`: Cliente B2B (único con acceso al carrito).
+  * `Guest`: Usuario no autenticado que navega el catálogo libremente pero con funciones de cuenta bloqueadas.
 * **Particularidades Técnicas:**
   * Cultura: `en-US` (usa punto decimal para montos).
   * Zona horaria: `America/Argentina/Buenos_Aires`.
@@ -35,7 +36,7 @@ Este documento sirve como referencia central sobre la arquitectura, stack tecnol
 
 ### Módulos Principales de la API
 1. **Auth (`/api/auth/login`):** Generación de token JWT.
-2. **Productos (`/api/products`):** Listado y búsqueda. El stock se consolida de múltiples depósitos y se categoriza mediante estados semánticos (`VERDE`, `AMARILLO`, `ROJO`).
+2. **Productos (`/api/products` y `/api/products/guest`):** Listado y búsqueda. El stock se consolida de múltiples depósitos y se categoriza mediante estados semánticos (`VERDE`, `AMARILLO`, `ROJO`). En modo invitado, se fuerza el endpoint `/guest` inyectando el header `X-Api-Key` en lugar del Bearer Token.
 3. **Pedidos (`/api/orders`):** Gestión de órdenes. Internamente ligado al `legacyOrderId` de Softland.
 4. **Carrito (`/api/cart`):** Exclusivo para clientes para preparar su orden.
 5. **Clientes (`/api/customers`):** Búsqueda de información de clientes mapeada a la tabla `VTMCLH` de Softland.
