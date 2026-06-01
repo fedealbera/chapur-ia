@@ -56,6 +56,8 @@ class CartModel extends Cart {
     super.iva105Usd,
     super.customerAccountNumber,
     super.customerName,
+    super.shippingLabel,
+    super.shippingFree,
   });
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
@@ -73,8 +75,43 @@ class CartModel extends Cart {
       grandTotalUsd: (json['grandTotalUsd'] as num?)?.toDouble() ?? 0.0,
       iva21Usd: (json['iva21Usd'] as num?)?.toDouble() ?? 0.0,
       iva105Usd: (json['iva105Usd'] as num?)?.toDouble() ?? 0.0,
-      customerAccountNumber: json['customerAccountNumber']?.toString(),
-      customerName: json['customerName']?.toString(),
+      customerAccountNumber: json['customerAccountNumber']?.toString() ?? json['customer']?['accountNumber']?.toString(),
+      customerName: json['customerName']?.toString() ?? json['customer']?['name']?.toString(),
+      shippingLabel: json['shippingLabel']?.toString() ?? json['customer']?['shippingLabel']?.toString(),
+      shippingFree: json['shippingFree'] as bool? ?? json['customer']?['shippingFree'] as bool?,
+    );
+  }
+
+  @override
+  CartModel copyWith({
+    List<CartItem>? items,
+    double? subtotal,
+    double? ivaTotal,
+    double? grandTotal,
+    double? subtotalUsd,
+    double? ivaTotalUsd,
+    double? grandTotalUsd,
+    double? iva21Usd,
+    double? iva105Usd,
+    String? customerAccountNumber,
+    String? customerName,
+    String? shippingLabel,
+    bool? shippingFree,
+  }) {
+    return CartModel(
+      items: items ?? this.items,
+      subtotal: subtotal ?? this.subtotal,
+      ivaTotal: ivaTotal ?? this.ivaTotal,
+      grandTotal: grandTotal ?? this.grandTotal,
+      subtotalUsd: subtotalUsd ?? this.subtotalUsd,
+      ivaTotalUsd: ivaTotalUsd ?? this.ivaTotalUsd,
+      grandTotalUsd: grandTotalUsd ?? this.grandTotalUsd,
+      iva21Usd: iva21Usd ?? this.iva21Usd,
+      iva105Usd: iva105Usd ?? this.iva105Usd,
+      customerAccountNumber: customerAccountNumber ?? this.customerAccountNumber,
+      customerName: customerName ?? this.customerName,
+      shippingLabel: shippingLabel ?? this.shippingLabel,
+      shippingFree: shippingFree ?? this.shippingFree,
     );
   }
 }

@@ -15,6 +15,8 @@ abstract class ICartRemoteDataSource {
 
 class CartRemoteDataSourceImpl implements ICartRemoteDataSource {
   final Dio dio;
+  String? _cachedShippingLabel;
+  bool? _cachedShippingFree;
 
   CartRemoteDataSourceImpl({required this.dio});
 
@@ -22,12 +24,35 @@ class CartRemoteDataSourceImpl implements ICartRemoteDataSource {
   Future<CartModel> getCart() async {
     try {
       final response = await dio.get('/cart');
-      return CartModel.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data as Map<String, dynamic>;
+
+      final apiShippingLabel = data['shippingLabel']?.toString() ?? data['customer']?['shippingLabel']?.toString();
+      final apiShippingFree = (data['shippingFree'] as bool?) ?? (data['customer']?['shippingFree'] as bool?);
+
+      if (apiShippingLabel != null) {
+        _cachedShippingLabel = apiShippingLabel;
+      }
+      if (apiShippingFree != null) {
+        _cachedShippingFree = apiShippingFree;
+      }
+
+      final cart = CartModel.fromJson(data);
+      return cart.copyWith(
+        shippingLabel: apiShippingLabel ?? _cachedShippingLabel,
+        shippingFree: apiShippingFree ?? _cachedShippingFree,
+      );
     } catch (e) {
       // If the cart doesn't exist yet, we might get a 404 or empty response.
       // Based on user info, GET /api/cart creates it if not exists or just returns OK.
       // We'll return an empty cart if it fails or if data is missing.
-      return const CartModel(items: [], subtotal: 0.0, ivaTotal: 0.0, grandTotal: 0.0);
+      return CartModel(
+        items: const [],
+        subtotal: 0.0,
+        ivaTotal: 0.0,
+        grandTotal: 0.0,
+        shippingLabel: _cachedShippingLabel,
+        shippingFree: _cachedShippingFree,
+      );
     }
   }
 
@@ -52,10 +77,16 @@ class CartRemoteDataSourceImpl implements ICartRemoteDataSource {
   @override
   Future<void> selectCustomer(String customerAccountNumber) async {
     try {
-      await dio.post(
+      final response = await dio.post(
         '/cart/select-customer',
         data: {'customerAccountNumber': customerAccountNumber},
       );
+      final responseData = response.data as Map<String, dynamic>?;
+      if (responseData != null && responseData['customer'] != null) {
+        final customerData = responseData['customer'] as Map<String, dynamic>;
+        _cachedShippingLabel = customerData['shippingLabel']?.toString();
+        _cachedShippingFree = customerData['shippingFree'] as bool?;
+      }
     } catch (e) {
       rethrow;
     }
@@ -65,6 +96,8 @@ class CartRemoteDataSourceImpl implements ICartRemoteDataSource {
   Future<void> clearCart() async {
     try {
       await dio.delete('/cart');
+      _cachedShippingLabel = null;
+      _cachedShippingFree = null;
     } catch (e) {
       rethrow;
     }

@@ -225,7 +225,13 @@ class _CartPageState extends State<CartPage> {
                   _buildSummaryRow('IVA 10.5%', iva105),
                 ],
                 const SizedBox(height: 12),
-                _buildSummaryRowText('Costo de Envío', 'GRATIS', textColor: Colors.green),
+                _buildSummaryRowText(
+                  'Costo de Envío',
+                  (cart.shippingLabel != null && cart.shippingLabel!.trim().isNotEmpty)
+                      ? cart.shippingLabel!
+                      : 'GRATIS',
+                  textColor: Colors.green,
+                ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Divider(height: 1, color: Color(0xFFF2F2F2)),
