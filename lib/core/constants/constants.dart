@@ -1,6 +1,6 @@
 class AppConstants {
-  static const String baseUrl = 'http://190.229.67.119/api';
-  static const String productImageBaseUrl = 'http://190.229.67.119/content/product/';
+  static const String baseUrl = 'https://pedidos.tmc.com.ar/api';
+  static const String productImageBaseUrl = 'https://pedidos.tmc.com.ar/content/product/';
 
   // Storage Keys
   static const String tokenKey = 'JWT_TOKEN';

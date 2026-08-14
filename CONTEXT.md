@@ -32,7 +32,7 @@ Este documento sirve como referencia central sobre la arquitectura, stack tecnol
 A continuación se detalla la estructura y propósito de los archivos del proyecto en `lib/`:
 
 ### 3.1. Capa Core (`lib/core/`)
-* [constants.dart](file:///Users/federicoalbera/Documents/Proyectos/ChuroMobile/Chapur-IA/lib/core/constants/constants.dart): Define la dirección base de la API (`http://190.229.67.119/api`), constantes de almacenamiento seguro y los códigos de marcas fijas del sistema:
+* [constants.dart](file:///Users/federicoalbera/Documents/Proyectos/ChuroMobile/Chapur-IA/lib/core/constants/constants.dart): Define la dirección base de la API (`https://pedidos.tmc.com.ar/api`), constantes de almacenamiento seguro y los códigos de marcas fijas del sistema:
   * `98`: **TMC**
   * `343`: **TANTOR**
 * [dio_interceptor.dart](file:///Users/federicoalbera/Documents/Proyectos/ChuroMobile/Chapur-IA/lib/core/network/dio_interceptor.dart): Contiene `AuthInterceptor`. Maneja la inyección del token JWT en las cabeceras de autorización. Además, implementa el **Modo Invitado**: cuando detecta `GUEST_MODE`, intercepta las llamadas a `/products` y redirige internamente a `/products/guest`, normaliza el parámetro de búsqueda `q` a `search` e inyecta la cabecera `X-Api-Key` correspondiente.

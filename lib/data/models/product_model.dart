@@ -1,3 +1,4 @@
+import '../../core/constants/constants.dart';
 import '../../domain/entities/product.dart';
 
 class ProductModel extends Product {
@@ -26,7 +27,7 @@ class ProductModel extends Product {
       unitPrice: (json['priceUsd'] as num? ?? json['price'] as num? ?? json['unitPrice'] as num? ?? 0.0).toDouble(),
       priceListCode: json['priceListCode']?.toString() ?? '',
       imageUrl: json['imageUrl']?.toString() ?? 
-                'http://190.229.67.119/content/product/${(json['articleCode']?.toString() ?? '').trim()}.jpg',
+                '${AppConstants.productImageBaseUrl}${(json['articleCode']?.toString() ?? '').trim()}.jpg',
       stockStatus: json['stockStatus']?.toString() ?? '',
       stockQuantity: (json['stockQuantity'] as num?)?.toInt() ?? 0,
     );

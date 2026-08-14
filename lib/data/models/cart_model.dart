@@ -1,3 +1,4 @@
+import 'package:chapur_ia/core/constants/constants.dart';
 import 'package:chapur_ia/domain/entities/cart.dart';
 import 'package:chapur_ia/domain/entities/cart_item.dart';
 
@@ -31,7 +32,7 @@ class CartItemModel extends CartItem {
       ivaAmountUsd: (json['ivaAmountUsd'] as num?)?.toDouble(),
       stockStatus: json['stockStatus']?.toString(),
       imageUrl: json['imageUrl']?.toString() ?? 
-                'http://190.229.67.119/content/product/${(json['articleCode']?.toString() ?? '').trim()}.jpg',
+                '${AppConstants.productImageBaseUrl}${(json['articleCode']?.toString() ?? '').trim()}.jpg',
     );
   }
 
