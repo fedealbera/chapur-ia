@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -362,6 +363,42 @@ class _ProductListItem extends StatefulWidget {
 
 class _ProductListItemState extends State<_ProductListItem> {
   int _quantity = 0;
+  late TextEditingController _quantityController;
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _quantityController = TextEditingController(text: '$_quantity');
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _quantityController.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: _quantityController.text.length,
+        );
+      } else {
+        if (_quantityController.text.isEmpty) {
+          setState(() {
+            _quantity = 0;
+            _quantityController.text = '0';
+          });
+        } else {
+          final val = int.tryParse(_quantityController.text) ?? 0;
+          setState(() {
+            _quantity = val;
+            _quantityController.text = '$_quantity';
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _quantityController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   void _increment() {
     final authState = context.read<AuthBloc>().state;
@@ -371,6 +408,7 @@ class _ProductListItemState extends State<_ProductListItem> {
     if (isCustomer || isGuest || _quantity < widget.product.stockQuantity) {
       setState(() {
         _quantity++;
+        _quantityController.text = '$_quantity';
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -386,6 +424,41 @@ class _ProductListItemState extends State<_ProductListItem> {
     if (_quantity > 0) {
       setState(() {
         _quantity--;
+        _quantityController.text = '$_quantity';
+      });
+    }
+  }
+
+  void _onTextChanged(String value) {
+    if (value.isEmpty) {
+      setState(() {
+        _quantity = 0;
+      });
+      return;
+    }
+
+    final val = int.tryParse(value) ?? 0;
+    final authState = context.read<AuthBloc>().state;
+    final bool isCustomer = authState is Authenticated && authState.user.isCustomer;
+    final bool isGuest = authState is Authenticated && authState.user.isGuest;
+
+    if (!isCustomer && !isGuest && val > widget.product.stockQuantity) {
+      setState(() {
+        _quantity = widget.product.stockQuantity;
+        _quantityController.text = '$_quantity';
+        _quantityController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _quantityController.text.length),
+        );
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cantidad limitada al stock disponible (${widget.product.stockQuantity})'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      setState(() {
+        _quantity = val;
       });
     }
   }
@@ -503,16 +576,41 @@ class _ProductListItemState extends State<_ProductListItem> {
                 children: [
                   _buildIconBtn('assets/images/less.png', _decrement),
                   Container(
-                    width: 40,
+                    width: 65,
+                    height: 36,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2F2F2),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: _focusNode.hasFocus 
+                            ? const Color(0xFFD61D26) 
+                            : Colors.transparent,
+                        width: 1.5,
+                      ),
+                    ),
                     alignment: Alignment.center,
-                    child: Text(
-                      '$_quantity',
+                    child: TextField(
+                      controller: _quantityController,
+                      focusNode: _focusNode,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontFamily: 'Inter',
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                        border: InputBorder.none,
+                      ),
+                      onChanged: _onTextChanged,
+                      onSubmitted: (_) => _focusNode.unfocus(),
                     ),
                   ),
                   _buildIconBtn('assets/images/more.png', _increment),
@@ -560,6 +658,7 @@ class _ProductListItemState extends State<_ProductListItem> {
                   );
                   setState(() {
                     _quantity = 0; 
+                    _quantityController.text = '0';
                   });
                 },
                 style: ElevatedButton.styleFrom(
