@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -447,7 +448,7 @@ class _CartPageState extends State<CartPage> {
   }
 }
 
-class _CartProductItem extends StatelessWidget {
+class _CartProductItem extends StatefulWidget {
   final CartItem item;
   final NumberFormat usdFormat;
 
@@ -457,8 +458,67 @@ class _CartProductItem extends StatelessWidget {
   });
 
   @override
+  State<_CartProductItem> createState() => _CartProductItemState();
+}
+
+class _CartProductItemState extends State<_CartProductItem> {
+  late TextEditingController _quantityController;
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _quantityController = TextEditingController(text: '${widget.item.quantity}');
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        _quantityController.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: _quantityController.text.length,
+        );
+      } else {
+        _submitNewQuantity();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(_CartProductItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.item.quantity != oldWidget.item.quantity && !_focusNode.hasFocus) {
+      _quantityController.text = '${widget.item.quantity}';
+    }
+  }
+
+  @override
+  void dispose() {
+    _quantityController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _submitNewQuantity() {
+    if (_quantityController.text.isEmpty) {
+      _quantityController.text = '${widget.item.quantity}';
+      return;
+    }
+    final val = int.tryParse(_quantityController.text) ?? widget.item.quantity;
+    if (val == widget.item.quantity) {
+      return;
+    }
+    if (val < 1) {
+      _quantityController.text = '${widget.item.quantity}';
+      return;
+    }
+
+    final difference = val - widget.item.quantity;
+    context.read<CartBloc>().add(
+      AddToCartRequested(widget.item.copyWith(quantity: difference))
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final unitPrice = item.priceUsd ?? 0.0;
+    final unitPrice = widget.item.priceUsd ?? 0.0;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -487,7 +547,7 @@ class _CartProductItem extends StatelessWidget {
               color: Colors.white,
             ),
             child: CachedNetworkImage(
-              imageUrl: item.imageUrl ?? '',
+              imageUrl: widget.item.imageUrl ?? '',
               fit: BoxFit.contain,
               placeholder: (context, url) => const Center(
                 child: SizedBox(
@@ -512,7 +572,7 @@ class _CartProductItem extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        item.description ?? 'Producto',
+                        widget.item.description ?? 'Producto',
                         style: const TextStyle(
                           color: Color(0xFF565656),
                           fontSize: 15,
@@ -526,7 +586,7 @@ class _CartProductItem extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        context.read<CartBloc>().add(RemoveFromCartRequested(item.articleCode));
+                        context.read<CartBloc>().add(RemoveFromCartRequested(widget.item.articleCode));
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(4.0),
@@ -542,7 +602,7 @@ class _CartProductItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${item.quantity} x ${usdFormat.format(unitPrice)}',
+                  '${widget.item.quantity} x ${widget.usdFormat.format(unitPrice)}',
                   style: const TextStyle(
                     color: Color(0xFF474747),
                     fontSize: 14,
@@ -554,7 +614,7 @@ class _CartProductItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      usdFormat.format(unitPrice),
+                      widget.usdFormat.format(unitPrice),
                       style: const TextStyle(
                         color: Color(0xFFDE535C),
                         fontSize: 18,
@@ -565,28 +625,52 @@ class _CartProductItem extends StatelessWidget {
                     Row(
                       children: [
                         _buildIconBtn(context, 'assets/images/less.png', () {
-                          if (item.quantity > 1) {
+                          if (widget.item.quantity > 1) {
                             context.read<CartBloc>().add(
-                              AddToCartRequested(item.copyWith(quantity: -1))
+                              AddToCartRequested(widget.item.copyWith(quantity: -1))
                             );
                           }
                         }),
                         Container(
-                          width: 30,
+                          width: 65,
+                          height: 32,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF2F2F2),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: _focusNode.hasFocus 
+                                  ? const Color(0xFFD61D26) 
+                                  : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
                           alignment: Alignment.center,
-                          child: Text(
-                            '${item.quantity}',
+                          child: TextField(
+                            controller: _quantityController,
+                            focusNode: _focusNode,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontFamily: 'Inter',
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
-                              fontFamily: 'Inter',
                             ),
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.zero,
+                              isDense: true,
+                              border: InputBorder.none,
+                            ),
+                            onSubmitted: (_) => _focusNode.unfocus(),
                           ),
                         ),
                         _buildIconBtn(context, 'assets/images/more.png', () {
                           context.read<CartBloc>().add(
-                            AddToCartRequested(item.copyWith(quantity: 1))
+                            AddToCartRequested(widget.item.copyWith(quantity: 1))
                           );
                         }),
                       ],
