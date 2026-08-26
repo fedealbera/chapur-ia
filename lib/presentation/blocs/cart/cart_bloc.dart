@@ -111,18 +111,64 @@ class CartBloc extends Bloc<CartEvent, CartState> {
   }
 
   Future<void> _onAddToCart(AddToCartRequested event, Emitter<CartState> emit) async {
+    // Capture the existing CartLoaded state if available BEFORE emitting CartLoading()
+    CartLoaded? previousLoadedState;
+    if (state is CartLoaded) {
+      previousLoadedState = state as CartLoaded;
+    }
+
     emit(CartLoading());
-    // If we haven't loaded the cart yet, we should ideally load it or assume it's new.
-    // The user said: "cuando se agrega por primera vez un item al carrito debe llamarse al endpoint api/cart"
-    // We'll treat 'LoadCartRequested' as that initialization if needed.
     
-    if (state is! CartLoaded) {
+    // If we haven't loaded the cart yet, we should ideally load it or assume it's new.
+    if (previousLoadedState == null) {
       // First time initialization
       final initResult = await getCartUseCase.execute();
-      if (initResult.isLeft()) {
-        initResult.fold((f) => emit(CartFailure(f.message)), (_) => null);
+      await initResult.fold(
+        (f) async {
+          emit(CartFailure(f.message));
+        },
+        (cart) async {
+          final discountsResult = await getCartDiscountsUseCase.execute();
+          CartDiscounts? discounts;
+          discountsResult.fold((_) => null, (d) => discounts = d);
+          previousLoadedState = CartLoaded(cart, discounts: discounts);
+        },
+      );
+      if (previousLoadedState == null) {
+        return; // Error already emitted
+      }
+    }
+
+    if (event.item.quantity < 0) {
+      final items = previousLoadedState!.cart.items;
+      final index = items.indexWhere((i) => i.articleCode == event.item.articleCode);
+      
+      if (index == -1) {
+        emit(const CartFailure('El artículo no se encuentra en el carrito.'));
         return;
       }
+      
+      final existingItem = items[index];
+      final newQuantity = existingItem.quantity + event.item.quantity;
+      
+      final removeResult = await removeItemFromCartUseCase.execute(event.item.articleCode);
+      if (removeResult.isLeft()) {
+        removeResult.fold((failure) => emit(CartFailure(failure.message)), (_) => null);
+        return;
+      }
+      
+      if (newQuantity > 0) {
+        final addResult = await addItemToCartUseCase.execute(
+          event.item.copyWith(quantity: newQuantity),
+        );
+        addResult.fold(
+          (failure) => emit(CartFailure(failure.message)),
+          (_) => add(LoadCartRequested()),
+        );
+      } else {
+        add(LoadCartRequested());
+      }
+      return;
     }
 
     final addResult = await addItemToCartUseCase.execute(event.item);
