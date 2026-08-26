@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:chapur_ia/core/network/auth_event_bus.dart';
 import 'package:chapur_ia/domain/entities/user.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,6 +58,7 @@ class AuthFailureState extends AuthState {
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
   final IAuthRepository authRepository;
+  StreamSubscription? _sessionExpiredSubscription;
 
   AuthBloc({
     required this.loginUseCase,
@@ -65,6 +68,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginRequested>(_onLoginRequested);
     on<LogoutRequested>(_onLogoutRequested);
     on<LoginAsGuestRequested>(_onLoginAsGuestRequested);
+
+    // Listen to session expiration events from the HTTP layer
+    _sessionExpiredSubscription = AuthEventBus.instance.onSessionExpired.listen((_) {
+      add(LogoutRequested());
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _sessionExpiredSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onAuthCheckRequested(

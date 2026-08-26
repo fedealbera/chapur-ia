@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:chapur_ia/core/constants/constants.dart';
+import 'package:chapur_ia/core/network/auth_event_bus.dart';
 
 class AuthInterceptor extends Interceptor {
   final FlutterSecureStorage secureStorage;
@@ -27,5 +28,21 @@ class AuthInterceptor extends Interceptor {
       }
     }
     return handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response?.statusCode == 401 && !err.requestOptions.path.contains('/auth/login')) {
+      final token = await secureStorage.read(key: AppConstants.tokenKey);
+      if (token != null) {
+        // Clear current session tokens
+        await secureStorage.delete(key: AppConstants.tokenKey);
+        await secureStorage.delete(key: AppConstants.userKey);
+
+        // Notify the application about session expiration
+        AuthEventBus.instance.notifySessionExpired();
+      }
+    }
+    return handler.next(err);
   }
 }

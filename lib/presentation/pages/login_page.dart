@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chapur_ia/presentation/blocs/auth/auth_bloc.dart';
+import 'package:chapur_ia/injection_container.dart' as di;
+import 'package:chapur_ia/domain/repositories/i_auth_repository.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +17,34 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final result = await di.sl<IAuthRepository>().getSavedCredentials();
+    result.fold(
+      (failure) => null, // Ignore failures
+      (credentials) {
+        if (credentials != null) {
+          setState(() {
+            _emailController.text = credentials['email'] ?? '';
+            _passwordController.text = credentials['password'] ?? '';
+          });
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

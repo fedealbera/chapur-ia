@@ -5,6 +5,8 @@ class AppConstants {
   // Storage Keys
   static const String tokenKey = 'JWT_TOKEN';
   static const String userKey = 'USER_DATA';
+  static const String savedEmailKey = 'SAVED_EMAIL';
+  static const String savedPasswordKey = 'SAVED_PASSWORD';
 
   // Roles
   static const String roleAdmin = 'Admin';

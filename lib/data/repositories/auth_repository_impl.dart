@@ -43,6 +43,10 @@ class AuthRepositoryImpl implements IAuthRepository {
         key: AppConstants.userKey, 
         value: jsonEncode(userModel.toJson()),
       );
+      
+      // Save credentials for fast/automatic login
+      await secureStorage.write(key: AppConstants.savedEmailKey, value: email);
+      await secureStorage.write(key: AppConstants.savedPasswordKey, value: password);
 
       return Right(userModel);
     } catch (e) {
@@ -55,7 +59,10 @@ class AuthRepositoryImpl implements IAuthRepository {
     // Call DELETE /api/cart before clearing local session.
     // Silently ignore errors so logout always completes.
     try {
-      await cartRepository.clearCart();
+      final token = await secureStorage.read(key: AppConstants.tokenKey);
+      if (token != null && token != 'GUEST_MODE') {
+        await cartRepository.clearCart();
+      }
     } catch (_) {}
     await secureStorage.delete(key: AppConstants.tokenKey);
     await secureStorage.delete(key: AppConstants.userKey);
@@ -91,6 +98,34 @@ class AuthRepositoryImpl implements IAuthRepository {
       );
 
       return const Right(guestModel);
+    } catch (e) {
+      return Left(ErrorHandler.handleException(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, String>?>> getSavedCredentials() async {
+    try {
+      final email = await secureStorage.read(key: AppConstants.savedEmailKey);
+      final password = await secureStorage.read(key: AppConstants.savedPasswordKey);
+      if (email != null && password != null) {
+        return Right({
+          'email': email,
+          'password': password,
+        });
+      }
+      return const Right(null);
+    } catch (e) {
+      return Left(ErrorHandler.handleException(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> clearSavedCredentials() async {
+    try {
+      await secureStorage.delete(key: AppConstants.savedEmailKey);
+      await secureStorage.delete(key: AppConstants.savedPasswordKey);
+      return const Right(null);
     } catch (e) {
       return Left(ErrorHandler.handleException(e));
     }

@@ -13,4 +13,8 @@ abstract class IAuthRepository {
   Future<Either<Failure, User?>> getAuthenticatedUser();
 
   Future<Either<Failure, User>> loginAsGuest();
+
+  Future<Either<Failure, Map<String, String>?>> getSavedCredentials();
+
+  Future<Either<Failure, void>> clearSavedCredentials();
 }
